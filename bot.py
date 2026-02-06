@@ -109,6 +109,7 @@ async def main() -> None:
         token=settings.bot_token,
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
+    expire_task: asyncio.Task[None] | None = None
     try:
         try:
             me = await bot.get_me()
@@ -138,6 +139,7 @@ async def main() -> None:
                 interval_seconds=settings.expire_check_interval_seconds,
             )
         )
+
         await dp.start_polling(bot)
     finally:
         if expire_task is not None:

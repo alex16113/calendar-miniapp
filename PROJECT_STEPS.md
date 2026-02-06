@@ -65,6 +65,20 @@ project: Smart Scheduler
     - подтверждение пользователю больше не содержит строки `Meet: ...`: `services/meeting_formatter.py`
     - кнопка “🎥 Подключиться к Meet” убрана из confirm и из `/my`: `handlers/moderation.py`, `handlers/my_requests.py`
 
+## Сводка фактически внедрённых правок (2026-02-06)
+
+- **Деплой/секреты**:
+  - добавлен скрипт `scripts/runtime_bootstrap.py` для записи JSON-секретов из env в файлы и проверки конфигурации
+  - `.env.example` расширен примерами `GOOGLE_*_JSON`
+  - `README.md` дополняет старт-команду для Railway и ограничения shared-хостинга
+
+## Сводка фактически внедрённых правок (2026-02-06, Cloud.ru volume-only)
+
+- **Cloud.ru Container Apps + volume**:
+  - хранение данных только через том `/app/data` (без S3‑sync)
+  - добавлены `Dockerfile` и `.dockerignore`
+  - обновлены env/инструкции в `.env.example` и `README.md`
+
 ---
 
 ## PHASE 0 — Подготовка репо и окружения

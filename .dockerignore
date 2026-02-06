@@ -1,0 +1,16 @@
+.git
+.gitignore
+.cursor
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.db
+runtime
+.env
+credentials.json
+client_secrets.json
+client_secret.json
+token.json
+*.log

@@ -1,11 +1,11 @@
 ---
-updated: 2026-02-06
+updated: 2026-02-07
 project: Smart Scheduler (Telegram bot)
 ---
 
 # Handoff: текущее состояние проекта
 
-Этот файл — чтобы другой агент мог продолжить без контекста чата.
+Этот файл — общее состояние бота и инфраструктуры. **Для Mini App и API (этапы 1–8, что сделано, что делать дальше)** используй **AGENT_HANDOFF.md** в корне репо — там актуальный контекст и промпт для нового агента.
 
 ## Что уже реализовано (по факту)
 
@@ -98,10 +98,28 @@ project: Smart Scheduler (Telegram bot)
 
 ## Как запустить
 
+**Только бот (как раньше):**
 ```bash
 . .venv/bin/activate
 python bot.py
 ```
+
+**Бот + API в одном процессе** (для Mini App, порт 8000):
+```bash
+. .venv/bin/activate
+python run.py
+```
+API: `GET /health`, `GET /`, слоты, бронирование, мои заявки. Документация: http://localhost:8000/docs
+
+**Как проверить этап 5 (Мои заявки) без Mini App:** эндпоинты `/my/meetings` и `/my/meetings/{id}/cancel` требуют заголовок `X-Telegram-Init-Data`. Для теста сгенерируй валидную строку (только локально):
+```bash
+. .venv/bin/activate
+INIT_DATA=$(python scripts/gen_init_data.py YOUR_TELEGRAM_USER_ID)
+curl -s -H "X-Telegram-Init-Data: $INIT_DATA" "http://localhost:8000/my/meetings?page=0&limit=5"
+```
+В Swagger (http://localhost:8000/docs) в заголовок запроса вручную добавь `X-Telegram-Init-Data` со значением `$INIT_DATA`. Для отмены: `POST /my/meetings/{id}/cancel` с тем же заголовком.
+
+**Проверка этапа 6 (Mini App):** в папке `mini-app/` — `npm install && npm run dev`. Локально откроется без initData (API будет 401). Чтобы проверить «Мои заявки» из приложения: раздай собранный `mini-app/dist/` по тому же домену, что и API (calendar.vpncfo.ru), и открой бота в Telegram → Menu Button — тогда initData будет валидным и список заявок подтянется.
 
 ## Как протестировать Google API
 

@@ -87,6 +87,9 @@ class Settings:
     pending_ttl_hours: int
     expire_check_interval_seconds: int
 
+    # Mini App (URL для кнопки «Открыть приложение» в боте)
+    bot_webapp_url: Optional[str] = None
+
 
 def load_settings(*, dotenv_path: Path = DEFAULT_DOTENV_PATH) -> Settings:
     """
@@ -122,9 +125,12 @@ def load_settings(*, dotenv_path: Path = DEFAULT_DOTENV_PATH) -> Settings:
     pending_ttl_hours = _as_int("PENDING_TTL_HOURS", default=24)
     expire_check_interval_seconds = _as_int("EXPIRE_CHECK_INTERVAL_SECONDS", default=60)
 
+    bot_webapp_url = (os.getenv("BOT_WEBAPP_URL") or "").strip() or None
+
     return Settings(
         bot_token=bot_token,
         admin_id=admin_id,
+        bot_webapp_url=bot_webapp_url,
         calendar_id=calendar_id,
         credentials_path=credentials_path,
         google_auth_mode=google_auth_mode,

@@ -1,5 +1,7 @@
 aiogram==3.24.0
+fastapi==0.115.6
 google-api-python-client==2.188.0
 google-auth-oauthlib==1.2.2
 google-auth-httplib2==0.2.0
 pytz==2025.2
+uvicorn[standard]==0.34.0

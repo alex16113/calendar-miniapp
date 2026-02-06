@@ -17,6 +17,7 @@ from aiogram.types import (
     Message,
     ReplyKeyboardMarkup,
     ReplyKeyboardRemove,
+    WebAppInfo,
 )
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
@@ -114,8 +115,15 @@ def _duration_kb() -> InlineKeyboardMarkup:
     return kb.as_markup()
 
 def _main_menu_kb() -> ReplyKeyboardMarkup:
+    row1 = [KeyboardButton(text="Записаться"), KeyboardButton(text="Мои заявки")]
+    keyboard: list[list[KeyboardButton]] = [row1]
+    webapp_url = getattr(get_settings(), "bot_webapp_url", None)
+    if webapp_url:
+        keyboard.append([
+            KeyboardButton(text="Открыть приложение", web_app=WebAppInfo(url=webapp_url)),
+        ])
     return ReplyKeyboardMarkup(
-        keyboard=[[KeyboardButton(text="Записаться"), KeyboardButton(text="Мои заявки")]],
+        keyboard=keyboard,
         resize_keyboard=True,
         one_time_keyboard=False,
     )

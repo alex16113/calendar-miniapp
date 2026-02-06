@@ -1,6 +1,6 @@
 ---
 
-## last_updated: 2026-02-05
+## last_updated: 2026-02-06
 
 project: Smart Scheduler
 
@@ -72,12 +72,11 @@ project: Smart Scheduler
   - `.env.example` расширен примерами `GOOGLE_*_JSON`
   - `README.md` дополняет старт-команду для Railway и ограничения shared-хостинга
 
-## Сводка фактически внедрённых правок (2026-02-06, Cloud.ru volume-only)
+## Сводка фактически внедрённых правок (2026-02-06, деплой VPS + Dokploy)
 
-- **Cloud.ru Container Apps + volume**:
-  - хранение данных только через том `/app/data` (без S3‑sync)
-  - добавлены `Dockerfile` и `.dockerignore`
-  - обновлены env/инструкции в `.env.example` и `README.md`
+- **Прод**: бот развёрнут на VPS через Dokploy (Deploy from Git, образ из репо).
+- **Данные**: host-path `/opt/calendar-data` → `/app/data` в контейнере; `Dockerfile` и `.dockerignore` в корне.
+- Документация обновлена: `HANDOFF.md`, `README.md`; план по Mini App вынесен в `MINI_APP_ROADMAP.md`.
 
 ---
 

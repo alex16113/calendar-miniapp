@@ -1,5 +1,5 @@
 ---
-updated: 2026-02-05
+updated: 2026-02-06
 project: Smart Scheduler (Telegram bot)
 ---
 
@@ -114,8 +114,13 @@ python scripts/check_google_event.py
 ## Где смотреть план/этапы
 - `PROJECT_STEPS.md` — живой роадмап, какие фазы DONE и что дальше.
 
-## Деплой на Railway (важные нюансы)
-- **Секреты не в репо**: `credentials.json/client_secret*.json/token.json` игнорируются. На Railway их нужно **передать как переменные** и **создать файлы на старте** (см. ниже) или использовать Railway volumes.\n+- **SQLite**: локально путь `DB_PATH=database/smart_scheduler.db`. На Railway нужен **persistent volume** и `DB_PATH` указывать в маунт (иначе данные теряются при redeploy).\n+- **Команда старта**: `python bot.py`.\n+\n+Практичный вариант без volume для секретов:\n+- завести переменные `GOOGLE_CREDENTIALS_JSON` (или `GOOGLE_OAUTH_CLIENT_SECRET_JSON`, `GOOGLE_OAUTH_TOKEN_JSON`) и в Start Command перед запуском сделать `printf '%s' \"$GOOGLE_CREDENTIALS_JSON\" > credentials.json` (аналогично для `token.json`).\n+\n+Обязательные env на Railway: `BOT_TOKEN`, `ADMIN_ID`, `CALENDAR_ID`, `GOOGLE_AUTH_MODE`, `TIMEZONE`, `DB_PATH`, `LOG_LEVEL` и файлы/переменные для auth.\n+
+## Деплой (VPS + Dokploy) — текущий прод
+
+- **Окружение**: бот запущен в Docker на VPS через Dokploy (Deploy from Git, образ из репо).
+- **Данные**: host-path volume `/opt/calendar-data` на сервере → `/app/data` в контейнере.
+- **Файлы в volume**: `client_secrets.json`, `token.json`, `smart_scheduler.db` лежат в `/opt/calendar-data` на VPS (копировать через `scp` или положить при первом запуске).
+- **Env**: см. `.env.example`; пути — `DB_PATH=/app/data/smart_scheduler.db`, `GOOGLE_OAUTH_*_PATH=/app/data/...`.
+- **Режим**: polling, один экземпляр, без внешнего реестра образов.
 ## Что делать дальше (следующий логичный этап)
 
 ### PHASE 6 — Автоматизация “непротухание”

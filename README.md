@@ -77,34 +77,12 @@ python scripts/init_db.py
 python bot.py
 ```
 
-## Деплой (Railway) — что учесть
+## Деплой (VPS + Dokploy) — текущий прод
 
-- **Не коммитим секреты**: `.env`, `credentials.json`, `client_secret*.json`, `token.json`, `*.db` — в `.gitignore`.
-- **Переменные окружения**: перенеси значения из `.env` в Railway Variables.
-- **Google credentials/token**: на Railway их нужно доставить как файл в runtime (например, через переменные с JSON и запись в файл в start command) или через persistent volume.
-- **SQLite**: без persistent volume база будет теряться при redeploy. Для прод — либо volume, либо внешний Postgres (позже).
-- **DB_PATH**: укажи путь в маунт volume (например, `/data/smart_scheduler.db`).
-- **Старт-команда**: `python scripts/runtime_bootstrap.py && python bot.py`.
+- **Сборка**: Dokploy → Deploy from Git, Dockerfile в корне репо, образ например `calendar:latest`.
+- **Volume**: host-path `/opt/calendar-data` на сервере → mount path `/app/data` в контейнере.
+- **Файлы**: положить в `/opt/calendar-data` на VPS: `client_secrets.json`, `token.json`, при необходимости `smart_scheduler.db` (через `scp` или после первого запуска).
+- **Env**: `BOT_TOKEN`, `ADMIN_ID`, `CALENDAR_ID`, `GOOGLE_AUTH_MODE=oauth`, `DB_PATH=/app/data/smart_scheduler.db`, `GOOGLE_OAUTH_CLIENT_SECRETS_PATH=/app/data/client_secrets.json`, `GOOGLE_OAUTH_TOKEN_PATH=/app/data/token.json`, плюс `TIMEZONE`, `WORK_START`, `WORK_END`, `BUFFER_HOURS`, `LOG_LEVEL`, `PENDING_TTL_HOURS`, `EXPIRE_CHECK_INTERVAL_SECONDS`.
+- **Порты**: не публиковать (бот без HTTP). Replicas: 1, restart: always.
 
-### Shared hosting (Timeweb/Beget) — отличия
-
-- **Polling-процесс**: shared-хостинги часто не дают держать долгоживущий процесс. Уточни поддержку фоновых задач.
-- **Если только cron**: polling не подходит, нужен webhook или внешний запуск.
-- **Секреты**: храни JSON-файлы вне webroot, права доступа минимальные.
-
-Подробный контекст и карта кода: см. `HANDOFF.md` и `PROJECT_STEPS.md`.
-
-## Деплой (Cloud.ru Container Apps + volume)
-
-- **Container Apps**: режим polling → **min=1, max=1**, без scale-to-zero.
-- **Файлы данных**: использовать `/app/data` внутри контейнера.
-- **Volume**: примонтировать том в `/app/data` (в Cloud.ru том требует бакет, но S3‑sync в коде не используется).
-- **Docker**: см. `Dockerfile` и `.dockerignore`.
-
-Пример env для контейнера:
-
-```bash
-DB_PATH=/app/data/smart_scheduler.db
-GOOGLE_OAUTH_CLIENT_SECRETS_PATH=/app/data/client_secrets.json
-GOOGLE_OAUTH_TOKEN_PATH=/app/data/token.json
-```
+Подробный контекст и карта кода: см. `HANDOFF.md` и `PROJECT_STEPS.md`. План по Mini App (отдельный проект): `MINI_APP_ROADMAP.md`.

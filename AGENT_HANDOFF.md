@@ -76,23 +76,53 @@
 - **Фон**: `body` и `#root` с `background: var(--tg-theme-bg-color)` (системная тема).
 - **Админка**: добавлены все админ-эндпоинты и экран `/#/admin`; блок «Админка» на главной показывается только если пользователь — админ (проверка GET /admin/settings).
 
-## Запуск образа (этап 8)
+## Установка через GitHub — что делать дальше
 
-- Сборка: `docker build -t calendar-miniapp .`
-- Запуск с volume для БД и OAuth:  
-  `docker run -p 8000:8000 -v /path/on/host/data:/app/data -e BOT_TOKEN=... -e ADMIN_ID=... -e BOT_WEBAPP_URL=https://calendar.vpncfo.ru -e DB_PATH=/app/data/smart_scheduler.db -e GOOGLE_OAUTH_TOKEN_PATH=/app/data/token.json -e GOOGLE_OAUTH_CLIENT_SECRETS_PATH=/app/data/client_secrets.json ... остальные env ... calendar-miniapp`
-- В Dokploy: домен calendar.vpncfo.ru, HTTPS на прокси; проброс порта 8000; volume на `/app/data`.
+Код запушен в репозиторий: **https://github.com/alex16113/calendar-miniapp** (ветка `main`).
 
-## Что проверить после деплоя на calendar.vpncfo.ru
+### 1. Деплой на Dokploy
 
-1. `https://calendar.vpncfo.ru/health` → `{"status":"ok"}`.
-2. `https://calendar.vpncfo.ru/` — открывается Mini App (главная).
-3. Из Telegram: кнопка «Открыть приложение» → тот же домен; слоты, запись, «Мои заявки», админка (под админ-аккаунтом).
+1. **Создать приложение** в Dokploy: New Application → выбери тип (Docker / Docker Compose — в зависимости от того, как у тебя настроен Dokploy).
+2. **Подключить GitHub**: источник образа — GitHub Repo. Укажи репо `alex16113/calendar-miniapp`, ветку `main`. Build: Dockerfile (корень репо).
+3. **Порт**: в настройках сервиса укажи порт приложения **8000** (проброс наружу).
+4. **Домен**: привяжи домен **calendar.vpncfo.ru** к этому сервису. HTTPS настраивается на стороне Dokploy/прокси.
+5. **Volume**: добавь volume и примонтируй к пути контейнера **`/app/data`**. Сюда будут писаться БД и OAuth-файлы (см. env ниже).
+6. **Переменные окружения** (из `.env.example`, значения подставить):
+   - `BOT_TOKEN`, `ADMIN_ID` — обязательно.
+   - `BOT_WEBAPP_URL=https://calendar.vpncfo.ru` — для кнопки в боте и CORS.
+   - `DB_PATH=/app/data/smart_scheduler.db`
+   - `GOOGLE_OAUTH_TOKEN_PATH=/app/data/token.json`, `GOOGLE_OAUTH_CLIENT_SECRETS_PATH=/app/data/client_secrets.json` (если OAuth).
+   - Остальное: `CALENDAR_ID`, `TIMEZONE`, `WORK_START`, `WORK_END`, `BUFFER_HOURS`, `GOOGLE_AUTH_MODE=oauth` и т.д.
+7. **Секреты** (credentials, token) не хранить в репо: положить на сервер в каталог, смонтированный в `/app/data`, или задать через env (если Dokploy поддерживает JSON в переменных — см. комментарии в `.env.example`).
+8. Запустить деплой (Build & Deploy). После успешного билда контейнер будет слушать 8000 и раздавать API + Mini App с корня.
 
-## Что сделать дальше
+### 2. Локальный запуск из клона (без Dokploy)
 
-1. **Деплой на Dokploy**: создать сервис из образа, задать env и volume `/app/data`, привязать домен calendar.vpncfo.ru.
-2. **Опционально**: экраны настроек и broadcast в UI админки (API уже есть); доработка дизайна по Design Spec.
+```bash
+git clone https://github.com/alex16113/calendar-miniapp.git
+cd calendar-miniapp
+docker build -t calendar-miniapp .
+docker run -p 8000:8000 -v "$(pwd)/data:/app/data" \
+  -e BOT_TOKEN=... -e ADMIN_ID=... -e BOT_WEBAPP_URL=https://calendar.vpncfo.ru \
+  -e DB_PATH=/app/data/smart_scheduler.db \
+  -e GOOGLE_OAUTH_TOKEN_PATH=/app/data/token.json \
+  -e GOOGLE_OAUTH_CLIENT_SECRETS_PATH=/app/data/client_secrets.json \
+  -e CALENDAR_ID=... -e TIMEZONE=Europe/Moscow -e GOOGLE_AUTH_MODE=oauth \
+  calendar-miniapp
+```
+
+Каталог `./data` на хосте должен содержать при необходимости `token.json`, `client_secrets.json`; БД создастся сама по `DB_PATH`.
+
+### 3. Что проверить после деплоя на calendar.vpncfo.ru
+
+1. **https://calendar.vpncfo.ru/health** → `{"status":"ok"}`.
+2. **https://calendar.vpncfo.ru/** — открывается Mini App (главная).
+3. В Telegram: кнопка «Открыть приложение» у бота ведёт на тот же домен; проверить слоты, запись, «Мои заявки», админку (под админ-аккаунтом).
+
+### 4. Дальше (опционально)
+
+- Экраны настроек и broadcast в UI админки (API уже есть).
+- Доработка дизайна по Design Spec в `MINI_APP_ROADMAP.md`.
 
 ## Документы
 

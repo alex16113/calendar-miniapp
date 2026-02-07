@@ -571,3 +571,430 @@ h2 {
     color: rgba(30, 41, 59, 0.4);
   }
 }
+
+/* ========== Inner Page Layout (с gradient bg) ========== */
+
+.page {
+  position: relative;
+}
+
+.page-title {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  margin: 8px 0 20px 0;
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+@media (prefers-color-scheme: light) {
+  .page-title {
+    color: #1e293b;
+    text-shadow: none;
+  }
+}
+
+.page-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  margin-bottom: 8px;
+  transition: opacity 0.2s;
+}
+
+.page-back:active {
+  opacity: 0.5;
+}
+
+@media (prefers-color-scheme: light) {
+  .page-back {
+    color: var(--tg-button);
+  }
+}
+
+.page-section-label {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 24px 0 12px 4px;
+}
+
+@media (prefers-color-scheme: light) {
+  .page-section-label {
+    color: var(--tg-hint);
+  }
+}
+
+/* Glass Panel — контейнер для контента */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: 8px;
+  margin-bottom: 16px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+@media (prefers-color-scheme: light) {
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(255, 255, 255, 0.85);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+}
+
+/* Glass Button — кнопка внутри glass panel */
+.glass-btn {
+  display: block;
+  width: 100%;
+  padding: 16px 20px;
+  font-size: 17px;
+  font-weight: 600;
+  border: none;
+  border-radius: 18px;
+  cursor: pointer;
+  font-family: inherit;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  -webkit-tap-highlight-color: transparent;
+  margin-bottom: 6px;
+  text-align: center;
+  text-decoration: none;
+  letter-spacing: -0.2px;
+}
+
+.glass-btn:last-child {
+  margin-bottom: 0;
+}
+
+.glass-btn:active {
+  transform: scale(0.97);
+  background: rgba(255, 255, 255, 0.18);
+}
+
+@media (hover: hover) {
+  .glass-btn:hover {
+    background: rgba(255, 255, 255, 0.16);
+    transform: translateY(-1px);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .glass-btn {
+    background: rgba(0, 0, 0, 0.04);
+    color: #1e293b;
+  }
+  .glass-btn:active {
+    background: rgba(0, 0, 0, 0.08);
+  }
+  @media (hover: hover) {
+    .glass-btn:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+  }
+}
+
+.glass-btn-accent {
+  background: rgba(99, 102, 241, 0.35);
+  color: #fff;
+  border: 1px solid rgba(129, 140, 248, 0.3);
+}
+
+.glass-btn-accent:active {
+  background: rgba(99, 102, 241, 0.5);
+}
+
+@media (prefers-color-scheme: light) {
+  .glass-btn-accent {
+    background: var(--tg-button);
+    color: var(--tg-button-text);
+    border: none;
+  }
+}
+
+.glass-btn-ghost {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 12px 16px;
+}
+
+.glass-btn-ghost:active {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+@media (prefers-color-scheme: light) {
+  .glass-btn-ghost {
+    color: var(--destructive);
+  }
+}
+
+/* Glass Info Card — информационная карточка */
+.glass-info {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+
+@media (prefers-color-scheme: light) {
+  .glass-info {
+    background: rgba(255, 255, 255, 0.6);
+    border-color: rgba(255, 255, 255, 0.8);
+  }
+}
+
+.glass-info-label {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 6px;
+}
+
+.glass-info-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+
+@media (prefers-color-scheme: light) {
+  .glass-info-label { color: var(--tg-hint); }
+  .glass-info-value { color: #1e293b; }
+}
+
+/* Glass Form — поля ввода внутри стеклянной панели */
+.glass-form-group {
+  padding: 16px 16px 12px;
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-form-group:last-child {
+  border-bottom: none;
+}
+
+@media (prefers-color-scheme: light) {
+  .glass-form-group {
+    border-color: rgba(0, 0, 0, 0.06);
+  }
+}
+
+.glass-form-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 6px;
+  display: block;
+}
+
+@media (prefers-color-scheme: light) {
+  .glass-form-label { color: var(--tg-hint); }
+}
+
+.glass-input {
+  width: 100%;
+  padding: 10px 0;
+  font-size: 17px;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-family: inherit;
+  -webkit-appearance: none;
+  outline: none;
+}
+
+.glass-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+@media (prefers-color-scheme: light) {
+  .glass-input { color: #1e293b; }
+  .glass-input::placeholder { color: rgba(0, 0, 0, 0.25); }
+}
+
+/* Time grid для слотов */
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 8px;
+}
+
+.time-slot {
+  padding: 14px 8px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  font-family: inherit;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  -webkit-tap-highlight-color: transparent;
+  text-align: center;
+}
+
+.time-slot:active {
+  transform: scale(0.95);
+  background: rgba(99, 102, 241, 0.4);
+}
+
+@media (hover: hover) {
+  .time-slot:hover {
+    background: rgba(255, 255, 255, 0.18);
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .time-slot {
+    background: rgba(0, 0, 0, 0.04);
+    color: #1e293b;
+  }
+  .time-slot:active {
+    background: var(--tg-button);
+    color: #fff;
+  }
+}
+
+/* Success Card */
+.glass-success {
+  text-align: center;
+  padding: 40px 24px;
+  background: rgba(52, 199, 89, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(52, 199, 89, 0.2);
+  border-radius: 24px;
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.glass-success-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: rgba(52, 199, 89, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: var(--success);
+}
+
+.glass-success-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.glass-success-text {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.5;
+}
+
+@media (prefers-color-scheme: light) {
+  .glass-success-title { color: #1e293b; }
+  .glass-success-text { color: rgba(30, 41, 59, 0.7); }
+}
+
+/* Loading на glass фоне */
+.glass-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 15px;
+}
+
+.glass-loading .spinner {
+  border-color: rgba(255, 255, 255, 0.3);
+  border-top-color: transparent;
+}
+
+@media (prefers-color-scheme: light) {
+  .glass-loading {
+    color: var(--tg-hint);
+  }
+  .glass-loading .spinner {
+    border-color: var(--tg-hint);
+    border-top-color: transparent;
+  }
+}
+
+/* Empty state на glass фоне */
+.glass-empty {
+  text-align: center;
+  padding: 40px 24px;
+}
+
+.glass-empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.glass-empty-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 8px;
+}
+
+.glass-empty-text {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.5;
+}
+
+@media (prefers-color-scheme: light) {
+  .glass-empty-title { color: #1e293b; }
+  .glass-empty-text { color: var(--tg-hint); }
+}
+
+/* Error на glass фоне */
+.glass-error {
+  background: rgba(255, 59, 48, 0.15);
+  border: 1px solid rgba(255, 59, 48, 0.25);
+  border-radius: 16px;
+  padding: 14px 18px;
+  font-size: 14px;
+  color: #ff6b6b;
+  margin-bottom: 16px;
+}
+
+@media (prefers-color-scheme: light) {
+  .glass-error {
+    color: var(--destructive);
+    background: rgba(255, 59, 48, 0.08);
+    border-color: rgba(255, 59, 48, 0.15);
+  }
+}

@@ -33,7 +33,12 @@ def get_telegram_user_id(
     init_data_preview = x_telegram_init_data[:50] if x_telegram_init_data else "(empty)"
     logger.debug(f"Validating initData (preview): {init_data_preview}...")
     
-    validated = validate_init_data(x_telegram_init_data, settings.bot_token)
+    # Увеличенный TTL для диагностики (7 дней вместо 24 часов)
+    # Если проблема в устаревшем auth_date - это поможет
+    max_age = int(os.environ.get("INIT_DATA_MAX_AGE_SECONDS", str(7 * 24 * 3600)))
+    logger.debug(f"Using max_auth_age_seconds: {max_age}")
+    
+    validated = validate_init_data(x_telegram_init_data, settings.bot_token, max_auth_age_seconds=max_age)
     if not validated:
         logger.warning(f"initData validation failed for data starting with: {init_data_preview}")
         raise HTTPException(status_code=401, detail="Invalid or expired init data")

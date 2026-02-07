@@ -4,8 +4,17 @@ import { api } from "../api";
 
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [initDataMissing, setInitDataMissing] = useState(false);
 
   useEffect(() => {
+    // Проверяем наличие Telegram WebApp и initData
+    const tw = (window as any).Telegram?.WebApp;
+    if (!tw || !tw.initData) {
+      console.warn("[Home] initData missing - app opened outside Telegram or Menu Button not configured");
+      setInitDataMissing(true);
+      return;
+    }
+
     let cancelled = false;
     api.admin
       .getSettings()
@@ -17,6 +26,26 @@ export default function Home() {
       });
     return () => { cancelled = true; };
   }, []);
+
+  // Если initData отсутствует - показываем инструкцию
+  if (initDataMissing) {
+    return (
+      <div style={{ padding: 20, textAlign: "center" }}>
+        <h2 style={{ fontSize: 18, marginBottom: 16 }}>⚠️ Приложение нужно открыть через Telegram</h2>
+        <p style={{ color: "var(--tg-theme-hint-color)", fontSize: 14, marginBottom: 12 }}>
+          Это приложение работает только при запуске из Telegram-бота.
+        </p>
+        <div style={{ textAlign: "left", maxWidth: 400, margin: "0 auto", fontSize: 14, color: "var(--tg-theme-hint-color)" }}>
+          <p style={{ marginBottom: 8 }}><strong>Как открыть правильно:</strong></p>
+          <ol style={{ paddingLeft: 20 }}>
+            <li style={{ marginBottom: 8 }}>Найди бота <strong>@google_calendar_booking1_bot</strong> в Telegram</li>
+            <li style={{ marginBottom: 8 }}>Нажми кнопку <strong>"Открыть приложение"</strong> внизу (рядом с полем ввода)</li>
+            <li>Если кнопки нет — напиши <code>/start</code></li>
+          </ol>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

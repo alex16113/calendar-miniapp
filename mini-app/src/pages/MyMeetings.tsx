@@ -87,7 +87,7 @@ export default function MyMeetings() {
               >
                 <div className="meeting-card-header">
                   <div className="meeting-card-date">
-                    <span className="meeting-card-date-icon">📅</span>
+                    <span className="meeting-card-date-icon">🗓️</span>
                     <span>{m.start_local}</span>
                   </div>
                   <span className={`meeting-status meeting-status-${m.status}`}>

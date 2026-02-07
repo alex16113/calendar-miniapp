@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api, type WeekDay } from "../api";
 import { haptic } from "../utils/haptic";
+import { getTelegramDisplayName } from "../utils/telegramUser";
 
 const DURATIONS = [15, 30, 60, 90] as const;
 const WEEKDAY_NAMES = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
@@ -60,33 +61,46 @@ export default function Booking() {
   const [meetingId, setMeetingId] = useState<number | null>(null);
   const [prefilled, setPrefilled] = useState(false);
 
-  // Автозаполнение: имя из Telegram SDK, email из последней заявки
+  // Автозаполнение при монтировании: имя из Telegram, email из /my/profile
   useEffect(() => {
     if (prefilled) return;
-    setPrefilled(true);
-
-    // Имя из Telegram
-    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-    const tgName = tgUser
-      ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ")
-      : "";
-
-    // Email из последней заявки
-    api.getMyProfile()
+    const tgName = getTelegramDisplayName();
+    api
+      .getMyProfile()
       .then((profile) => {
         setForm((f) => ({
           ...f,
-          name: f.name || profile.user_name || tgName || "",
-          email: f.email || profile.user_email || "",
+          name: (f.name || profile.user_name || tgName || "").trim(),
+          email: (f.email || profile.user_email || "").trim(),
         }));
+        setPrefilled(true);
       })
       .catch(() => {
-        // API недоступен — хотя бы имя из Telegram
-        if (tgName) {
-          setForm((f) => ({ ...f, name: f.name || tgName }));
-        }
+        if (tgName) setForm((f) => ({ ...f, name: (f.name || tgName).trim() }));
+        setPrefilled(true);
       });
   }, [prefilled]);
+
+  // Повторная попытка при входе на шаг «форма» — если к этому моменту появились initData/профиль
+  useEffect(() => {
+    if (step !== "form") return;
+    const tgName = getTelegramDisplayName();
+    const needName = !form.name.trim();
+    const needEmail = !form.email.trim();
+    if (!needName && !needEmail) return;
+    api.getMyProfile().then(
+      (profile) => {
+        setForm((f) => ({
+          ...f,
+          name: needName ? (profile.user_name || tgName || f.name || "").trim() : f.name,
+          email: needEmail ? (profile.user_email || f.email || "").trim() : f.email,
+        }));
+      },
+      () => {
+        if (needName && tgName) setForm((f) => ({ ...f, name: tgName.trim() }));
+      }
+    );
+  }, [step]);
 
   // Открытие по прямой ссылке #/book?w=6 — сразу показываем шаг «неделя» с этим смещением
   useEffect(() => {
@@ -255,7 +269,7 @@ export default function Booking() {
         {step === "week" && (
           <>
             <div className="week-badge">
-              <span className="week-badge-icon">📆</span>
+              <span className="week-badge-icon">🗓️</span>
               <span className="week-badge-text">{getWeekRangeLabel(weekOffset)}</span>
             </div>
             {loading && !weekData ? (
@@ -265,7 +279,7 @@ export default function Booking() {
               </div>
             ) : daysWithSlots.length === 0 ? (
               <div className="glass-empty">
-                <div className="glass-empty-icon">📅</div>
+                <div className="glass-empty-icon">🗓️</div>
                 <div className="glass-empty-title">Нет свободных дней</div>
                 <div className="glass-empty-text">
                   Попробуйте следующую неделю

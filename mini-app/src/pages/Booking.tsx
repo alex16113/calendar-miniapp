@@ -273,7 +273,10 @@ export default function Booking() {
         {/* Шаг: выбор времени */}
         {step === "time" && selectedDate && (
           <>
-            <p className="page-section-label">{formatDayLabel(selectedDate)}</p>
+            <div className="week-badge">
+              <span className="week-badge-icon">🕐</span>
+              <span className="week-badge-text">{formatDayLabel(selectedDate)}</span>
+            </div>
             {loading && daySlots.length === 0 ? (
               <div className="glass-loading">
                 <span className="spinner"></span>
@@ -305,8 +308,8 @@ export default function Booking() {
                 </div>
               </div>
             )}
-            <button type="button" className="glass-btn-ghost" onClick={goBack} style={{ width: "100%", marginTop: 8 }}>
-              ← Другой день
+            <button type="button" className="glass-btn glass-btn-muted" onClick={goBack} style={{ marginTop: 8 }}>
+              ← Выбрать другой день
             </button>
           </>
         )}

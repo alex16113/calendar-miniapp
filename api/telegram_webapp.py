@@ -46,13 +46,15 @@ def validate_init_data(
         return None
 
     params = dict(pairs)
-    received_hash = params.pop("hash", None)
+    
+    # Telegram может передавать 'hash' (старый формат) или 'signature' (новый формат)
+    received_hash = params.pop("hash", None) or params.pop("signature", None)
     if not received_hash:
-        logger.debug("No hash field in initData")
+        logger.debug("No hash/signature field in initData")
         return None
     
     logger.debug(f"Parsed params keys: {list(params.keys())}")
-    logger.debug(f"Received hash: {received_hash[:16]}...")
+    logger.debug(f"Received hash/signature: {received_hash[:16]}...")
 
     # data_check_string: все поля кроме hash, отсортированы по ключу, key=value через \n
     data_check_string = "\n".join(

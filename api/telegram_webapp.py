@@ -48,33 +48,24 @@ def validate_init_data(
     params = dict(pairs)
     
     # Telegram может передавать 'hash' (старый формат) или 'signature' (новый формат Mini Apps)
-    # ВАЖНО: в новом формате есть ДВА поля 'signature':
-    # 1. Подпись HMAC (её извлекаем первой)
-    # 2. Дополнительные данные 'signature=...' (остаются в params)
     received_hash = params.pop("hash", None)
     if not received_hash:
-        # Новый формат: ищем 'signature' как подпись
-        # НО если есть несколько 'signature', нужна первая (HMAC)
-        # В parse_qsl может быть несколько одинаковых ключей
-        signature_values = [v for k, v in pairs if k == "signature"]
-        if signature_values:
-            # Первое значение - это HMAC подпись
-            received_hash = signature_values[0]
-            # Удаляем ТОЛЬКО первое 'signature' из params
-            # Оставшиеся 'signature' (если есть) остаются в data_check_string
-            temp_pairs = [(k, v) for k, v in pairs if k != "signature" or v != received_hash]
-            params = dict(temp_pairs)
-        else:
-            logger.debug("No hash/signature field in initData")
-            return None
+        received_hash = params.pop("signature", None)
     
-    logger.debug(f"Parsed params keys: {list(params.keys())}")
+    if not received_hash:
+        logger.debug("No hash/signature field in initData")
+        return None
+    
+    logger.debug(f"Parsed params keys before filtering: {list(params.keys())}")
     logger.debug(f"Received hash/signature: {received_hash[:16]}...")
 
-    # data_check_string: все поля кроме hash/signature (HMAC), отсортированы по ключу, key=value через \n
+    # data_check_string: все поля кроме hash и signature, отсортированы по ключу, key=value через \n
+    # ВАЖНО: исключаем ВСЕ поля 'signature' (могут быть дубликаты в новом формате)
+    filtered_params = {k: v for k, v in params.items() if k not in ("hash", "signature")}
     data_check_string = "\n".join(
-        f"{k}={v}" for k, v in sorted(params.items())
+        f"{k}={v}" for k, v in sorted(filtered_params.items())
     )
+    logger.debug(f"Filtered params keys: {list(filtered_params.keys())}")
     logger.debug(f"data_check_string preview: {data_check_string[:100]}...")
 
     # secret_key = HMAC_SHA256(bot_token, "WebAppData")

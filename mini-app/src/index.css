@@ -800,17 +800,17 @@ h2 {
 }
 
 .glass-form-label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.85);
   margin-bottom: 6px;
   display: block;
 }
 
 @media (prefers-color-scheme: light) {
-  .glass-form-label { color: var(--tg-hint); }
+  .glass-form-label { color: #1e293b; }
 }
 
 .glass-input {

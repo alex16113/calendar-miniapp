@@ -317,11 +317,9 @@ export default function Booking() {
         {/* Шаг: форма */}
         {step === "form" && selectedDate && selectedTime && (
           <form onSubmit={handleSubmitForm}>
-            <div className="glass-info">
-              <div className="glass-info-label">Выбранное время</div>
-              <div className="glass-info-value">
-                {formatDayLabel(selectedDate)}, {selectedTime}
-              </div>
+            <div className="week-badge" style={{ marginBottom: 20 }}>
+              <span className="week-badge-icon">⏰</span>
+              <span className="week-badge-text">{formatDayLabel(selectedDate)}, {selectedTime}</span>
             </div>
 
             <p className="page-section-label">Ваши данные</p>
@@ -371,8 +369,8 @@ export default function Booking() {
             <button type="submit" className="glass-btn glass-btn-accent" disabled={loading} style={{ marginTop: 16 }}>
               {loading ? "Отправка..." : "Отправить заявку"}
             </button>
-            <button type="button" className="glass-btn-ghost" style={{ width: "100%", marginTop: 8 }} onClick={goBack}>
-              ← Другое время
+            <button type="button" className="glass-btn glass-btn-muted" style={{ marginTop: 8 }} onClick={goBack}>
+              ← Выбрать другое время
             </button>
           </form>
         )}

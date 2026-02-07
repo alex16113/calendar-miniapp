@@ -140,31 +140,36 @@ def validate_init_data(
     params = dict(pairs)
     
     # Определяем формат: hash (старый) или signature (новый)
-    received_hash = params.pop("hash", None)
-    received_signature = params.pop("signature", None)
+    received_hash = params.get("hash")
+    received_signature = params.get("signature")
     
-    use_ed25519 = received_signature is not None and received_hash is None
+    logger.debug(f"Has hash: {received_hash is not None}, has signature: {received_signature is not None}")
     
-    logger.debug(f"Validation mode: {'Ed25519 (signature)' if use_ed25519 else 'HMAC (hash)'}")
-    logger.debug(f"Params keys: {list(params.keys())}")
+    if not received_hash and not received_signature:
+        logger.debug("No hash or signature field in initData")
+        return None
 
-    # Строим data_check_string: исключаем hash и signature, сортируем по ключу
+    # Пробуем оба метода: сначала HMAC (если есть hash), потом Ed25519 (если есть signature)
+    valid = False
+    
+    if received_hash:
+        # HMAC: исключаем ТОЛЬКО hash из data_check_string
+        hmac_params = {k: v for k, v in params.items() if k != "hash"}
+        hmac_dcs = "\n".join(f"{k}={v}" for k, v in sorted(hmac_params.items()))
+        logger.debug(f"HMAC data_check_string keys: {sorted(hmac_params.keys())}")
+        logger.debug(f"HMAC data_check_string preview: {hmac_dcs[:120]}...")
+        valid = _validate_via_hmac(hmac_dcs, bot_token, received_hash)
+    
+    if not valid and received_signature:
+        # Ed25519: исключаем hash И signature из data_check_string
+        ed_params = {k: v for k, v in params.items() if k not in ("hash", "signature")}
+        ed_dcs = "\n".join(f"{k}={v}" for k, v in sorted(ed_params.items()))
+        logger.debug(f"Ed25519 data_check_string keys: {sorted(ed_params.keys())}")
+        logger.debug(f"Ed25519 data_check_string preview: {ed_dcs[:120]}...")
+        valid = _validate_via_ed25519(ed_dcs, bot_token, received_signature)
+    
+    # Для возврата данных используем params без hash/signature
     filtered_params = {k: v for k, v in params.items() if k not in ("hash", "signature")}
-    data_check_string = "\n".join(
-        f"{k}={v}" for k, v in sorted(filtered_params.items())
-    )
-    logger.debug(f"data_check_string preview: {data_check_string[:100]}...")
-
-    # Валидация
-    if use_ed25519:
-        # Новый формат: Ed25519
-        valid = _validate_via_ed25519(data_check_string, bot_token, received_signature)
-    else:
-        if not received_hash:
-            logger.debug("No hash or signature field in initData")
-            return None
-        # Старый формат: HMAC-SHA256
-        valid = _validate_via_hmac(data_check_string, bot_token, received_hash)
     
     if not valid:
         return None

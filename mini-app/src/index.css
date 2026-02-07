@@ -1059,21 +1059,21 @@ h2 {
 }
 
 .meeting-card-even {
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .meeting-card-odd {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 @media (prefers-color-scheme: light) {
   .meeting-card-even {
-    background: rgba(255, 255, 255, 0.6);
-    border-color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.5);
+    border-color: rgba(255, 255, 255, 0.7);
   }
   .meeting-card-odd {
-    background: rgba(255, 255, 255, 0.8);
-    border-color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.85);
+    border-color: rgba(255, 255, 255, 0.95);
   }
 }
 

@@ -116,14 +116,14 @@ async def slots_week(
 @app.get("/slots/day")
 async def slots_day(
     user_id: int = Depends(get_telegram_user_id),
-    date_str: str = Query(..., description="Дата YYYY-MM-DD"),
+    date: str = Query(..., description="Дата YYYY-MM-DD", alias="date"),
     duration: int = Query(30, description="Длительность в минутах"),
 ):
     """Список слотов на день (время в таймзоне настроек), формат HH:MM."""
     if duration not in ALLOWED_DURATIONS:
         raise HTTPException(status_code=400, detail=f"duration must be one of {ALLOWED_DURATIONS}")
-    slots = await get_day_slots(date_str=date_str, duration_minutes=duration)
-    return {"date": date_str, "slots": slots}
+    slots = await get_day_slots(date_str=date, duration_minutes=duration)
+    return {"date": date, "slots": slots}
 
 
 # --- Booking ---

@@ -108,8 +108,16 @@ export const api = {
     getSettings: () => request<AdminSettings>("/admin/settings"),
     putTimezone: (timezone: string) =>
       request<{ ok: boolean }>("/admin/settings/timezone", { method: "PUT", body: JSON.stringify({ timezone }) }),
+    getTimezoneGoogle: () =>
+      request<{ timezone: string }>("/admin/settings/timezone/google"),
     putBufferHours: (buffer_hours: number) =>
       request<{ ok: boolean }>("/admin/settings/buffer_hours", { method: "PUT", body: JSON.stringify({ buffer_hours }) }),
+    putWorkSchedule: (work_schedule: Record<string, { enabled: boolean; start?: string | null; end?: string | null }>) =>
+      request<{ ok: boolean }>("/admin/settings/work_schedule", { method: "PUT", body: JSON.stringify({ work_schedule }) }),
+    addBlacklistDate: (date: string, reason?: string | null) =>
+      request<{ ok: boolean }>("/admin/settings/blacklist", { method: "POST", body: JSON.stringify({ date, reason: reason ?? null }) }),
+    removeBlacklistDate: (dateStr: string) =>
+      request<{ ok: boolean }>(`/admin/settings/blacklist/${encodeURIComponent(dateStr)}`, { method: "DELETE" }),
     getPending: (page = 0, limit = 10) =>
       request<AdminPendingResponse>(`/admin/pending?page=${page}&limit=${limit}`),
     confirmMeeting: (meetingId: number) =>

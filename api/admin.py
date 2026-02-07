@@ -66,6 +66,33 @@ async def admin_put_timezone(
     return {"ok": True}
 
 
+@router.get("/settings/timezone/google")
+async def admin_get_timezone_google(_admin_id: int = Depends(get_telegram_admin_id)):
+    """Таймзона из Google Calendar (для подменю «Взять из Google Calendar»)."""
+    import asyncio
+    from app_context import get_settings
+    from services.google_api import get_calendar_timezone
+
+    settings = get_settings()
+    if not settings.calendar_id:
+        raise HTTPException(status_code=503, detail="CALENDAR_ID not configured")
+    try:
+        tz_name = await asyncio.to_thread(
+            get_calendar_timezone,
+            calendar_id=settings.calendar_id,
+            auth_mode=settings.google_auth_mode,
+            service_account_json=settings.credentials_path,
+            oauth_client_secrets_json=settings.oauth_client_secrets_path,
+            oauth_token_json=settings.oauth_token_path,
+        )
+    except Exception as e:
+        logger.exception("Failed to fetch timezone from Google Calendar")
+        raise HTTPException(status_code=502, detail="Failed to get calendar timezone") from e
+    if not tz_name or not isinstance(tz_name, str):
+        raise HTTPException(status_code=502, detail="Invalid timezone from Google")
+    return {"timezone": tz_name}
+
+
 class PutBufferBody(BaseModel):
     buffer_hours: int = Field(..., ge=0, le=24)
 

@@ -34,6 +34,7 @@ def validate_init_data(
         либо None при невалидных данных.
     """
     if not init_data or not init_data.strip():
+        logger.debug("initData is empty or whitespace")
         return None
 
     try:
@@ -45,6 +46,7 @@ def validate_init_data(
     params = dict(pairs)
     received_hash = params.pop("hash", None)
     if not received_hash:
+        logger.debug("No hash field in initData")
         return None
 
     # data_check_string: все поля кроме hash, отсортированы по ключу, key=value через \n
@@ -67,6 +69,7 @@ def validate_init_data(
     ).hexdigest()
 
     if not hmac.compare_digest(computed_hash, received_hash):
+        logger.debug(f"HMAC mismatch: computed={computed_hash[:16]}..., received={received_hash[:16]}...")
         return None
 
     # Опционально: проверка возраста auth_date

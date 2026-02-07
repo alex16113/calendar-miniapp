@@ -14,6 +14,17 @@ const API_BASE = import.meta.env.VITE_API_URL || "";
 
 function getInitData(): string {
   const data = typeof window !== "undefined" && window.Telegram?.WebApp?.initData;
+  
+  // DEBUG: логируем для диагностики
+  if (typeof window !== "undefined") {
+    console.log("[API] Telegram object:", window.Telegram ? "exists" : "missing");
+    console.log("[API] WebApp object:", window.Telegram?.WebApp ? "exists" : "missing");
+    console.log("[API] initData length:", data ? data.length : 0);
+    if (!data) {
+      console.warn("[API] initData is empty! This will cause 422 errors.");
+    }
+  }
+  
   if (!data) return "";
   return data;
 }
@@ -34,6 +45,7 @@ async function request<T>(
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
   if (!res.ok) {
     const text = await res.text();
+    console.error(`[API] Request failed: ${path}`, res.status, text);
     throw new Error(text || `HTTP ${res.status}`);
   }
   if (res.status === 204 || res.headers.get("content-length") === "0")

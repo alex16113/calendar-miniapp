@@ -1014,6 +1014,37 @@ button.page-back {
   max-width: 200px;
 }
 
+/* Админ: кнопки Отклонить и Отклонить и заблокировать */
+.admin-btn-reject {
+  background: rgba(255, 59, 48, 0.14);
+  color: var(--destructive);
+  border: 1px solid rgba(255, 59, 48, 0.35);
+}
+.admin-btn-reject:active {
+  background: rgba(255, 59, 48, 0.25);
+}
+.admin-btn-ban {
+  background: rgba(255, 59, 48, 0.22);
+  color: var(--destructive);
+  border: 1px solid rgba(255, 59, 48, 0.4);
+  margin-top: 14px;
+}
+.admin-btn-ban:active {
+  background: rgba(255, 59, 48, 0.35);
+}
+@media (prefers-color-scheme: light) {
+  .admin-btn-reject {
+    background: rgba(220, 38, 38, 0.1);
+    color: #b91c1c;
+    border-color: rgba(220, 38, 38, 0.25);
+  }
+  .admin-btn-ban {
+    background: rgba(220, 38, 38, 0.15);
+    color: #b91c1c;
+    border-color: rgba(220, 38, 38, 0.3);
+  }
+}
+
 /* Time grid для слотов */
 .time-grid {
   display: grid;

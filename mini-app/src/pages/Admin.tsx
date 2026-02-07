@@ -355,13 +355,17 @@ function AdminPendingList({
                   <button type="button" className="glass-btn glass-btn-accent" onClick={() => onConfirm(m.id)}>
                     ✓ Подтвердить
                   </button>
-                  <button type="button" className="glass-btn glass-btn-muted" onClick={() => onReject(m.id)}>
+                  <button
+                    type="button"
+                    className="glass-btn admin-btn-reject"
+                    onClick={() => onReject(m.id)}
+                  >
                     ✕ Отклонить
                   </button>
                   <button
                     type="button"
-                    className="glass-btn"
-                    style={{ gridColumn: "1 / -1", background: "rgba(255,59,48,0.2)", color: "var(--destructive)" }}
+                    className="glass-btn admin-btn-ban"
+                    style={{ gridColumn: "1 / -1" }}
                     onClick={() => onBan(m.id)}
                   >
                     🚫 Отклонить и заблокировать

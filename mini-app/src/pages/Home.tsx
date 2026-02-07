@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api";
+import { haptic } from "../utils/haptic";
 
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
@@ -49,61 +50,60 @@ export default function Home() {
   }
 
   return (
-    <div>
-      <h1>Запись встречи</h1>
-      <p style={{ color: "var(--tg-hint)", fontSize: 15, marginBottom: 24, lineHeight: 1.5 }}>
-        Выберите действие ниже. Бронирование занимает меньше минуты.
-      </p>
+    <>
+      {/* Mesh Gradient Background */}
+      <div className="mesh-gradient-bg" />
+      
+      <div>
+        {/* Header */}
+        <header className="home-header">
+          <h1 className="home-title">Easy Meet</h1>
+          <p className="home-subtitle">
+            Назначайте встречи прямо в Telegram, выбирайте удобные слоты и получайте мгновенные уведомления о согласовании
+          </p>
+        </header>
 
-      <div className="card">
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 6, letterSpacing: "-0.3px" }}>
-            Новая встреча
-          </div>
-          <div style={{ fontSize: 14, color: "var(--tg-hint)", lineHeight: 1.5 }}>
-            Выберите удобное время в календаре и заполните краткую форму.
-          </div>
-        </div>
-        <Link to="/book" style={{ textDecoration: "none" }}>
-          <button type="button" className="btn">
-            Записаться
-          </button>
-        </Link>
-      </div>
-
-      <div className="card">
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 6, letterSpacing: "-0.3px" }}>
-            Мои заявки
-          </div>
-          <div style={{ fontSize: 14, color: "var(--tg-hint)", lineHeight: 1.5 }}>
-            Просмотр подтверждённых и ожидающих встреч.
-          </div>
-        </div>
-        <Link to="/my" style={{ textDecoration: "none" }}>
-          <button type="button" className="btn btn-secondary">
-            Открыть
-          </button>
-        </Link>
-      </div>
-
-      {isAdmin === true && (
-        <div className="card">
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 6, letterSpacing: "-0.3px" }}>
-              Админ-панель
+        {/* Main Stack - Glass Cards */}
+        <div style={{ paddingBottom: isAdmin ? 80 : 40 }}>
+          <Link 
+            to="/book" 
+            className="glass-card"
+            onClick={() => haptic.light()}
+          >
+            <div className="glass-card-content">
+              <div className="glass-card-icon">🗓️</div>
+              <div className="glass-card-text">
+                <h2 className="glass-card-title">Назначить встречу</h2>
+                <p className="glass-card-subtitle">Выбрать слот</p>
+              </div>
             </div>
-            <div style={{ fontSize: 14, color: "var(--tg-hint)", lineHeight: 1.5 }}>
-              Управление заявками, настройки и модерация.
+          </Link>
+
+          <Link 
+            to="/my" 
+            className="glass-card"
+            onClick={() => haptic.light()}
+          >
+            <div className="glass-card-content">
+              <div className="glass-card-icon">📋</div>
+              <div className="glass-card-text">
+                <h2 className="glass-card-title">Мои записи</h2>
+                <p className="glass-card-subtitle">Предстоящие встречи</p>
+              </div>
             </div>
-          </div>
-          <Link to="/admin" style={{ textDecoration: "none" }}>
-            <button type="button" className="btn btn-secondary">
-              Открыть
-            </button>
           </Link>
         </div>
-      )}
-    </div>
+
+        {/* Admin Footer */}
+        {isAdmin === true && (
+          <footer className="admin-footer">
+            <Link to="/admin" className="admin-footer-link">
+              <span>⚙️</span>
+              <span>Пульт управления</span>
+            </Link>
+          </footer>
+        )}
+      </div>
+    </>
   );
 }

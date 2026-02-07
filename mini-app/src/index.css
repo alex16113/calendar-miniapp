@@ -1117,6 +1117,22 @@ button.page-back {
   }
 }
 
+/* Админ: выделение пункта «Список заявок», если есть нерассмотренные */
+.admin-btn-pending-alert {
+  border: 1.5px solid var(--tg-button);
+  box-shadow: 0 0 0 1px rgba(0, 122, 255, 0.2);
+  animation: admin-pending-pulse 2s ease-in-out infinite;
+}
+.admin-pending-badge {
+  font-weight: 700;
+  color: var(--tg-button);
+  margin-left: 4px;
+}
+@keyframes admin-pending-pulse {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(0, 122, 255, 0.2); }
+  50% { box-shadow: 0 0 14px 3px rgba(0, 122, 255, 0.35); }
+}
+
 /* Time grid для слотов */
 .time-grid {
   display: grid;

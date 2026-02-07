@@ -318,8 +318,15 @@ function AdminMenu({
       </div>
       <p className="page-section-label">Выбери, что изменить:</p>
       <div className="glass-panel admin-menu">
-        <button type="button" className="glass-btn" onClick={() => onSelect("pending")}>
+        <button
+          type="button"
+          className={"glass-btn" + (pendingCount != null && pendingCount > 0 ? " admin-btn-pending-alert" : "")}
+          onClick={() => onSelect("pending")}
+        >
           📁 Список заявок на согласование
+          {pendingCount != null && pendingCount > 0 && (
+            <span className="admin-pending-badge"> {pendingCount}</span>
+          )}
         </button>
         <button type="button" className="glass-btn" onClick={() => onSelect("timezone")}>
           🌍 Таймзона

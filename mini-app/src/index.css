@@ -897,6 +897,52 @@ h2 {
   }
 }
 
+/* Админ: отображение диапазона времени (рабочие часы) */
+.admin-time-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.95);
+}
+.admin-time-summary-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+.admin-time-summary-text {
+  letter-spacing: 0.5px;
+}
+.admin-time-summary--off {
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.6);
+}
+@media (prefers-color-scheme: light) {
+  .admin-time-summary {
+    background: rgba(99, 102, 241, 0.06);
+    border-color: rgba(99, 102, 241, 0.12);
+    color: #3730a3;
+  }
+  .admin-time-summary--off {
+    background: rgba(0, 0, 0, 0.04);
+    color: rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Админ: поле времени — крупнее для удобного тапа */
+.admin-time-input {
+  padding: 14px 12px;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  min-height: 48px;
+}
+
 /* Time grid для слотов */
 .time-grid {
   display: grid;

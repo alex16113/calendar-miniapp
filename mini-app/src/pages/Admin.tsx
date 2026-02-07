@@ -560,29 +560,34 @@ function AdminWorkSchedule({
         <button type="button" className="glass-btn glass-btn-muted" style={{ marginBottom: 16 }} onClick={() => setSub("day")}>
           ← Назад
         </button>
-        <p className="page-section-label">{dayLabel}: введи часы (HH:MM–HH:MM)</p>
-        <div className="glass-panel">
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <p className="page-section-label">{dayLabel}: рабочие часы</p>
+        <div className="admin-time-summary">
+          <span className="admin-time-summary-icon">🕐</span>
+          <span className="admin-time-summary-text">{editStart} – {editEnd}</span>
+        </div>
+        <div className="glass-panel" style={{ padding: 0 }}>
+          <div className="glass-form-group">
+            <label className="glass-form-label">Начало</label>
             <input
               type="time"
-              className="glass-input"
-              style={{ flex: 1 }}
+              className="glass-input admin-time-input"
               value={editStart}
               onChange={(e) => setEditStart(e.target.value)}
             />
-            <span style={{ color: "var(--tg-hint)" }}>–</span>
+          </div>
+          <div className="glass-form-group">
+            <label className="glass-form-label">Конец</label>
             <input
               type="time"
-              className="glass-input"
-              style={{ flex: 1 }}
+              className="glass-input admin-time-input"
               value={editEnd}
               onChange={(e) => setEditEnd(e.target.value)}
             />
           </div>
-          <button type="button" className="glass-btn glass-btn-accent" style={{ marginTop: 12 }} disabled={saving} onClick={handleSetHours}>
-            {saving ? "Сохранение..." : "Сохранить"}
-          </button>
         </div>
+        <button type="button" className="glass-btn glass-btn-accent" style={{ marginTop: 16, width: "100%" }} disabled={saving} onClick={handleSetHours}>
+          {saving ? "Сохранение..." : "Сохранить"}
+        </button>
       </>
     );
   }
@@ -593,11 +598,18 @@ function AdminWorkSchedule({
         <button type="button" className="glass-btn glass-btn-muted" style={{ marginBottom: 16 }} onClick={() => setSub("list")}>
           ← Назад к дням
         </button>
-        <div className="glass-panel" style={{ marginBottom: 16 }}>
-          <div style={{ fontWeight: 600, fontSize: 18 }}>
-            {dayLabel}: {dayEnabled ? `${dayStart}–${dayEnd}` : "выходной"}
+        <p className="page-section-label">{dayLabel}</p>
+        {dayEnabled ? (
+          <div className="admin-time-summary" style={{ marginBottom: 16 }}>
+            <span className="admin-time-summary-icon">🕐</span>
+            <span className="admin-time-summary-text">{dayStart} – {dayEnd}</span>
           </div>
-        </div>
+        ) : (
+          <div className="admin-time-summary admin-time-summary--off" style={{ marginBottom: 16 }}>
+            <span className="admin-time-summary-icon">🏖️</span>
+            <span className="admin-time-summary-text">Выходной</span>
+          </div>
+        )}
         <div className="glass-panel">
           <button type="button" className="glass-btn" disabled={saving} onClick={() => { setEditStart(dayStart); setEditEnd(dayEnd); setSub("day_edit"); }}>
             🕒 Задать часы

@@ -567,23 +567,17 @@ function AdminWorkSchedule({
           <span className="admin-time-summary-icon">🕐</span>
           <span className="admin-time-summary-text">{editStart} – {editEnd}</span>
         </div>
-        <div className="glass-panel" style={{ padding: 0 }}>
-          <div className="glass-form-group admin-time-row">
-            <label className="glass-form-label">Начало</label>
-            <div className="admin-time-boxes">
-              <input type="number" min={0} max={23} className="glass-input admin-time-box" value={startH} onChange={(e) => setStart(parseInt(e.target.value, 10) || 0, startM)} />
-              <span className="admin-time-sep">:</span>
-              <input type="number" min={0} max={59} className="glass-input admin-time-box" value={startM} onChange={(e) => setStart(startH, parseInt(e.target.value, 10) || 0)} />
-            </div>
-          </div>
-          <div className="glass-form-group admin-time-row">
-            <label className="glass-form-label">Окончание</label>
-            <div className="admin-time-boxes">
-              <input type="number" min={0} max={23} className="glass-input admin-time-box" value={endH} onChange={(e) => setEnd(parseInt(e.target.value, 10) || 0, endM)} />
-              <span className="admin-time-sep">:</span>
-              <input type="number" min={0} max={59} className="glass-input admin-time-box" value={endM} onChange={(e) => setEnd(endH, parseInt(e.target.value, 10) || 0)} />
-            </div>
-          </div>
+        <p className="glass-form-label" style={{ marginTop: 16, marginBottom: 8 }}>Начало</p>
+        <div className="admin-time-block">
+          <input type="number" min={0} max={23} className="glass-input admin-time-box" value={startH} onChange={(e) => setStart(parseInt(e.target.value, 10) || 0, startM)} />
+          <span className="admin-time-sep">:</span>
+          <input type="number" min={0} max={59} className="glass-input admin-time-box" value={startM} onChange={(e) => setStart(startH, parseInt(e.target.value, 10) || 0)} />
+        </div>
+        <p className="glass-form-label" style={{ marginTop: 20, marginBottom: 8 }}>Окончание</p>
+        <div className="admin-time-block">
+          <input type="number" min={0} max={23} className="glass-input admin-time-box" value={endH} onChange={(e) => setEnd(parseInt(e.target.value, 10) || 0, endM)} />
+          <span className="admin-time-sep">:</span>
+          <input type="number" min={0} max={59} className="glass-input admin-time-box" value={endM} onChange={(e) => setEnd(endH, parseInt(e.target.value, 10) || 0)} />
         </div>
         <button type="button" className="glass-btn glass-btn-accent" style={{ marginTop: 16, width: "100%" }} disabled={saving} onClick={handleSetHours}>
           {saving ? "Сохранение..." : "Сохранить"}

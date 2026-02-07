@@ -989,21 +989,29 @@ button.page-back {
   user-select: none;
 }
 
-/* Буфер: поле ввода в видимом блоке */
+/* Буфер: компактный блок, не наслаивается на кнопку */
 .admin-buffer-input-wrap {
-  min-width: 80px;
+  width: fit-content;
+  min-width: 72px;
+  margin-bottom: 4px;
 }
 .admin-buffer-input {
-  width: 64px;
+  width: 56px;
   text-align: center;
   font-size: 18px;
   font-weight: 600;
+  padding: 10px 8px;
   -moz-appearance: textfield;
 }
 .admin-buffer-input::-webkit-outer-spin-button,
 .admin-buffer-input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+/* Дата: type="date" открывает календарь, текущая дата подсвечивается ОС */
+.admin-date-input {
+  max-width: 200px;
 }
 
 /* Time grid для слотов */

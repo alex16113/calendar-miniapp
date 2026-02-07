@@ -290,7 +290,7 @@ function AdminMenu({
           📁 Список ожидания (pending)
         </button>
         <button type="button" className="glass-btn" onClick={() => onSelect("broadcast")}>
-          🔔 Broadcast
+          🔔 Рассылка участникам встреч
         </button>
       </div>
     </>
@@ -693,7 +693,7 @@ function AdminBuffer({
           placeholder="0"
         />
       </div>
-      <button type="button" className="glass-btn glass-btn-accent" disabled={saving} onClick={handleSave}>
+      <button type="button" className="glass-btn glass-btn-accent" style={{ marginTop: 20 }} disabled={saving} onClick={handleSave}>
         {saving ? "Сохранение..." : "Сохранить"}
       </button>
     </>
@@ -741,10 +741,10 @@ function AdminBlacklist({
       <p className="page-section-label">Добавить дату</p>
       <div className="glass-panel">
         <div className="glass-form-group">
-          <label className="glass-form-label">Дата (ГГГГ-ММ-ДД)</label>
+          <label className="glass-form-label">Дата</label>
           <input
-            className="glass-input"
-            placeholder="2026-02-15"
+            type="date"
+            className="glass-input admin-date-input"
             value={addDate}
             onChange={(e) => setAddDate(e.target.value)}
           />
@@ -825,13 +825,13 @@ function AdminBroadcast({ onBack: _onBack }: { onBack: () => void }) {
   };
   return (
     <>
-      <p className="page-section-label">Рассылка на дату</p>
+      <p className="page-section-label">Рассылка участникам встреч на дату</p>
       <div className="glass-panel">
         <div className="glass-form-group">
-          <label className="glass-form-label">Дата встреч (ГГГГ-ММ-ДД)</label>
+          <label className="glass-form-label">Дата встреч</label>
           <input
-            className="glass-input"
-            placeholder="2026-02-15"
+            type="date"
+            className="glass-input admin-date-input"
             value={date}
             onChange={(e) => setDate(e.target.value)}
           />

@@ -5,7 +5,11 @@ import MyMeetings from "./pages/MyMeetings";
 import Admin from "./pages/Admin";
 import "./index.css";
 
+console.log('[APP] App.tsx loaded');
+
 function App() {
+  console.log('[APP] App component rendering');
+  
   return (
     <HashRouter>
       <Routes>

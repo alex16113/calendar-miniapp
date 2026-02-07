@@ -6,17 +6,84 @@
     <title>Запись в календарь</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-      // Инициализация Telegram WebApp ДО загрузки React
-      (function() {
-        if (window.Telegram && window.Telegram.WebApp) {
+      // КРИТИЧЕСКИЙ DEBUG: логируем на самом раннем этапе
+      console.log('[INIT] HTML loaded, checking Telegram SDK...');
+      
+      // Показываем статус загрузки прямо в DOM
+      window.addEventListener('DOMContentLoaded', function() {
+        var root = document.getElementById('root');
+        if (root) {
+          root.innerHTML = '<div style="padding:20px;text-align:center;font-family:system-ui"><h3>Загрузка...</h3><p id="debug-status" style="color:#888;font-size:12px">Инициализация</p></div>';
+        }
+        
+        var status = document.getElementById('debug-status');
+        function updateStatus(msg) {
+          console.log('[INIT] ' + msg);
+          if (status) status.textContent = msg;
+        }
+        
+        updateStatus('Проверка Telegram SDK...');
+        
+        if (!window.Telegram) {
+          updateStatus('ОШИБКА: Telegram SDK не загрузился!');
+          console.error('[INIT] window.Telegram is undefined');
+          return;
+        }
+        
+        updateStatus('Telegram SDK OK');
+        
+        if (!window.Telegram.WebApp) {
+          updateStatus('ОШИБКА: Telegram.WebApp отсутствует!');
+          console.error('[INIT] Telegram.WebApp is undefined');
+          return;
+        }
+        
+        updateStatus('WebApp OK, вызов ready()...');
+        
+        try {
           window.Telegram.WebApp.ready();
           window.Telegram.WebApp.expand();
+          updateStatus('Ready/expand вызваны');
+        } catch (e) {
+          updateStatus('ОШИБКА при ready/expand: ' + e.message);
+          console.error('[INIT] Error calling ready/expand:', e);
+          return;
         }
-      })();
+        
+        var initData = window.Telegram.WebApp.initData || '';
+        updateStatus('initData length: ' + initData.length);
+        console.log('[INIT] initData length:', initData.length);
+        
+        if (initData.length === 0) {
+          updateStatus('ВНИМАНИЕ: initData пустой (возможно открыто не через Menu Button)');
+        }
+        
+        updateStatus('Загрузка React...');
+      });
+      
+      // Отлавливаем все JS ошибки
+      window.addEventListener('error', function(e) {
+        console.error('[GLOBAL ERROR]', e.message, e.filename, e.lineno, e.colno, e.error);
+        var root = document.getElementById('root');
+        if (root) {
+          root.innerHTML = '<div style="padding:20px;color:red;font-family:system-ui"><h3>Ошибка загрузки</h3><pre style="font-size:11px;white-space:pre-wrap">' + 
+            e.message + '\n' + e.filename + ':' + e.lineno + 
+            '</pre></div>';
+        }
+      });
+      
+      window.addEventListener('unhandledrejection', function(e) {
+        console.error('[UNHANDLED REJECTION]', e.reason);
+      });
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div style="padding:20px;text-align:center;font-family:system-ui">
+        <h3>Загрузка приложения...</h3>
+        <p style="color:#888;font-size:12px">Если это сообщение не исчезает — проблема с загрузкой JavaScript</p>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

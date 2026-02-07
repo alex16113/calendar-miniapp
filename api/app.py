@@ -291,6 +291,23 @@ async def my_meetings_cancel(
     return {"ok": True}
 
 
+# Middleware для добавления заголовков безопасности (только для статики)
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+from starlette.responses import Response
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response: Response = await call_next(request)
+        # Для HTML и JS файлов — разрешаем inline scripts (нужно для Telegram SDK)
+        if request.url.path.endswith(('.html', '.js')) or request.url.path == '/':
+            # Разрешаем Telegram origins и inline scripts
+            response.headers['X-Frame-Options'] = 'ALLOW-FROM https://web.telegram.org'
+            # Не ставим строгий CSP — он может блокировать Telegram SDK
+        return response
+
+app.add_middleware(SecurityHeadersMiddleware)
+
 # Раздача статики Mini App (сборка из mini-app/dist). SPA (HashRouter) — fallback на index.html
 if STATIC_DIR.is_dir():
     app.mount("/", StaticFiles(directory=str(STATIC_DIR), html=True), name="static")

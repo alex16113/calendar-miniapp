@@ -1019,6 +1019,50 @@ button.page-back {
   text-align: left;
 }
 
+/* Админ: превью рабочих часов по дням (компактно) */
+.admin-work-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+}
+.admin-work-preview-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  color: rgba(255, 255, 255, 0.9);
+}
+.admin-work-preview-day {
+  font-weight: 600;
+  min-width: 22px;
+  color: rgba(255, 255, 255, 0.7);
+}
+.admin-work-preview-time {
+  font-weight: 500;
+}
+.admin-work-preview-item--off .admin-work-preview-time {
+  color: var(--tg-hint);
+}
+@media (prefers-color-scheme: light) {
+  .admin-work-preview {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.06);
+  }
+  .admin-work-preview-item {
+    color: #1e293b;
+  }
+  .admin-work-preview-day {
+    color: #64748b;
+  }
+  .admin-work-preview-item--off .admin-work-preview-time {
+    color: #94a3b8;
+  }
+}
+
 /* Админ: username в заявке */
 .admin-username-line {
   font-size: 13px;

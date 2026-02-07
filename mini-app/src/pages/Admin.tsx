@@ -650,8 +650,24 @@ function AdminWorkSchedule({
 
   return (
     <>
-      <p className="page-section-label">Выбери день недели:</p>
-      <div className="glass-panel" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+      <p className="page-section-label" style={{ marginBottom: 8 }}>Сейчас по дням</p>
+      <div className="admin-work-preview">
+        {WEEKDAY_KEYS.map((key, i) => {
+          const d = workSchedule[key];
+          const on = d?.enabled && d?.start && d?.end;
+          const start = (d?.start ?? "").trim();
+          const end = (d?.end ?? "").trim();
+          const text = on && start && end ? `${start.replace(/^0/, "")}–${end.replace(/^0/, "")}` : "—";
+          return (
+            <span key={key} className={`admin-work-preview-item ${on ? "" : "admin-work-preview-item--off"}`}>
+              <span className="admin-work-preview-day">{WEEKDAY_LABELS[i]}</span>
+              <span className="admin-work-preview-time">{text}</span>
+            </span>
+          );
+        })}
+      </div>
+      <p className="page-section-label" style={{ marginTop: 20, marginBottom: 8 }}>Выбери день недели:</p>
+      <div className="glass-panel admin-menu" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
         {WEEKDAY_KEYS.map((key, i) => (
           <button
             key={key}

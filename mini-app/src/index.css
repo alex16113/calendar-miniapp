@@ -989,6 +989,23 @@ button.page-back {
   user-select: none;
 }
 
+/* Буфер: поле ввода в видимом блоке */
+.admin-buffer-input-wrap {
+  min-width: 80px;
+}
+.admin-buffer-input {
+  width: 64px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  -moz-appearance: textfield;
+}
+.admin-buffer-input::-webkit-outer-spin-button,
+.admin-buffer-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 /* Time grid для слотов */
 .time-grid {
   display: grid;

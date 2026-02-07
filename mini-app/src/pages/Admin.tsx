@@ -530,7 +530,9 @@ function AdminWorkSchedule({
   };
 
   const handleSetHours = () => {
-    if (editStart >= editEnd) {
+    const [sH, sM] = parseHHMM(editStart);
+    const [eH, eM] = parseHHMM(editEnd);
+    if (sH * 60 + sM >= eH * 60 + eM) {
       alert("Начало должно быть раньше конца.");
       return;
     }
@@ -679,15 +681,16 @@ function AdminBuffer({
   };
   return (
     <>
-      <div className="glass-form-group">
-        <label className="glass-form-label">Буфер (часы, 0–24)</label>
+      <p className="glass-form-label" style={{ marginBottom: 8 }}>Буфер (часы, 0–24)</p>
+      <div className="admin-time-block admin-buffer-input-wrap">
         <input
           type="number"
           min={0}
           max={24}
-          className="glass-input"
+          className="glass-input admin-buffer-input"
           value={value}
           onChange={(e) => setValue(e.target.value)}
+          placeholder="0"
         />
       </div>
       <button type="button" className="glass-btn glass-btn-accent" disabled={saving} onClick={handleSave}>

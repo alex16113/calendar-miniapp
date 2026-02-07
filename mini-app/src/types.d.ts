@@ -17,6 +17,7 @@ interface TelegramWebApp {
   };
   ready: () => void;
   expand: () => void;
+  openTelegramLink?: (url: string) => void;
   themeParams: Record<string, string>;
   colorScheme: "light" | "dark";
   HapticFeedback?: {

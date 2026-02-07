@@ -188,6 +188,7 @@ async def admin_pending(
         items.append({
             "id": m.id,
             "user_id": m.user_id,
+            "username": (m.username or "").strip() or None,
             "user_name": (m.user_name or "").strip() or None,
             "user_email": (m.user_email or "").strip() or None,
             "subject": (m.subject or "").strip() or None,

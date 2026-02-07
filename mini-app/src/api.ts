@@ -147,6 +147,7 @@ export interface AdminSettings {
 export interface AdminPendingItem {
   id: number;
   user_id: number;
+  username: string | null;
   user_name: string | null;
   user_email: string | null;
   subject: string | null;

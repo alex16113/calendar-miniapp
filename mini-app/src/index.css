@@ -1014,34 +1014,51 @@ button.page-back {
   max-width: 200px;
 }
 
-/* Админ: кнопки Отклонить и Отклонить и заблокировать */
+/* Админ: ссылка «написать в Telegram» */
+.admin-open-chat {
+  font-size: 13px;
+  color: var(--tg-button);
+  text-decoration: none;
+}
+.admin-open-chat:active {
+  opacity: 0.8;
+}
+@media (prefers-color-scheme: light) {
+  .admin-open-chat {
+    color: var(--tg-button);
+  }
+}
+
+/* Админ: Отклонить (контур) и Заблокировать (заливка) — визуально различаются */
 .admin-btn-reject {
-  background: rgba(255, 59, 48, 0.14);
+  background: transparent;
   color: var(--destructive);
-  border: 1px solid rgba(255, 59, 48, 0.35);
+  border: 1.5px solid rgba(255, 59, 48, 0.5);
 }
 .admin-btn-reject:active {
-  background: rgba(255, 59, 48, 0.25);
+  background: rgba(255, 59, 48, 0.12);
 }
 .admin-btn-ban {
-  background: rgba(255, 59, 48, 0.22);
-  color: var(--destructive);
-  border: 1px solid rgba(255, 59, 48, 0.4);
+  background: var(--destructive);
+  color: #fff;
+  border: 1px solid rgba(255, 59, 48, 0.8);
   margin-top: 14px;
+  font-weight: 600;
 }
 .admin-btn-ban:active {
-  background: rgba(255, 59, 48, 0.35);
+  background: #e53430;
+  opacity: 0.95;
 }
 @media (prefers-color-scheme: light) {
   .admin-btn-reject {
-    background: rgba(220, 38, 38, 0.1);
+    background: transparent;
     color: #b91c1c;
-    border-color: rgba(220, 38, 38, 0.25);
+    border-color: rgba(220, 38, 38, 0.4);
   }
   .admin-btn-ban {
-    background: rgba(220, 38, 38, 0.15);
-    color: #b91c1c;
-    border-color: rgba(220, 38, 38, 0.3);
+    background: #dc2626;
+    color: #fff;
+    border-color: #b91c1c;
   }
 }
 

@@ -347,9 +347,26 @@ function AdminPendingList({
               >
                 <div style={{ marginBottom: 12 }}>
                   <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 4 }}>{m.start_local}</div>
-                  <div style={{ fontSize: 14, color: "var(--tg-hint)" }}>
+                  <div style={{ fontSize: 14, color: "var(--tg-hint)", marginBottom: 4 }}>
                     {m.user_name || "—"} · {m.subject || "Без темы"}
                   </div>
+                  {(m.username || m.user_id) && (
+                    <a
+                      href="#"
+                      className="admin-open-chat"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const link = `tg://user?id=${m.user_id}`;
+                        if (window.Telegram?.WebApp?.openTelegramLink) {
+                          window.Telegram.WebApp.openTelegramLink(link);
+                        } else {
+                          window.open(link, "_blank");
+                        }
+                      }}
+                    >
+                      {m.username ? `@${m.username}` : "Написать в Telegram"}
+                    </a>
+                  )}
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                   <button type="button" className="glass-btn glass-btn-accent" onClick={() => onConfirm(m.id)}>
@@ -368,7 +385,7 @@ function AdminPendingList({
                     style={{ gridColumn: "1 / -1" }}
                     onClick={() => onBan(m.id)}
                   >
-                    🚫 Отклонить и заблокировать
+                    🚫 Заблокировать пользователя
                   </button>
                 </div>
               </div>

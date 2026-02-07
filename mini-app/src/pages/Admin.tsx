@@ -274,6 +274,9 @@ function AdminMenu({
       </div>
       <p className="page-section-label">Выбери, что изменить:</p>
       <div className="glass-panel">
+        <button type="button" className="glass-btn" onClick={() => onSelect("pending")}>
+          📁 Список заявок на согласование
+        </button>
         <button type="button" className="glass-btn" onClick={() => onSelect("timezone")}>
           🌍 Таймзона
         </button>
@@ -285,9 +288,6 @@ function AdminMenu({
         </button>
         <button type="button" className="glass-btn" onClick={() => onSelect("blacklist")}>
           🚫 Задать дни без встреч
-        </button>
-        <button type="button" className="glass-btn" onClick={() => onSelect("pending")}>
-          📁 Список заявок на согласование
         </button>
         <button type="button" className="glass-btn" onClick={() => onSelect("broadcast")}>
           🔔 Рассылка участникам встреч
@@ -350,23 +350,27 @@ function AdminPendingList({
                   <div style={{ fontSize: 14, color: "var(--tg-hint)", marginBottom: 4 }}>
                     {m.user_name || "—"} · {m.subject || "Без темы"}
                   </div>
-                  {(m.username || m.user_id) && (
-                    <a
-                      href="#"
-                      className="admin-open-chat"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        const link = `tg://user?id=${m.user_id}`;
-                        if (window.Telegram?.WebApp?.openTelegramLink) {
-                          window.Telegram.WebApp.openTelegramLink(link);
-                        } else {
-                          window.open(link, "_blank");
-                        }
-                      }}
-                    >
-                      {m.username ? `@${m.username}` : "Написать в Telegram"}
-                    </a>
-                  )}
+                  <div className="admin-username-line">
+                    {m.username ? (
+                      <a
+                        href="#"
+                        className="admin-open-chat"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const link = `tg://user?id=${m.user_id}`;
+                          if (window.Telegram?.WebApp?.openTelegramLink) {
+                            window.Telegram.WebApp.openTelegramLink(link);
+                          } else {
+                            window.open(link, "_blank");
+                          }
+                        }}
+                      >
+                        @{m.username}
+                      </a>
+                    ) : (
+                      <span className="admin-username-absent">username отсутствует</span>
+                    )}
+                  </div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                   <button type="button" className="glass-btn glass-btn-accent" onClick={() => onConfirm(m.id)}>

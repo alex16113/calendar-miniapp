@@ -1014,14 +1014,20 @@ button.page-back {
   max-width: 200px;
 }
 
-/* Админ: ссылка «написать в Telegram» */
-.admin-open-chat {
+/* Админ: username в заявке */
+.admin-username-line {
   font-size: 13px;
+}
+.admin-open-chat {
   color: var(--tg-button);
   text-decoration: none;
 }
 .admin-open-chat:active {
   opacity: 0.8;
+}
+.admin-username-absent {
+  color: var(--tg-hint);
+  font-style: italic;
 }
 @media (prefers-color-scheme: light) {
   .admin-open-chat {

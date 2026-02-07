@@ -58,6 +58,35 @@ export default function Booking() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [meetingId, setMeetingId] = useState<number | null>(null);
+  const [prefilled, setPrefilled] = useState(false);
+
+  // Автозаполнение: имя из Telegram SDK, email из последней заявки
+  useEffect(() => {
+    if (prefilled) return;
+    setPrefilled(true);
+
+    // Имя из Telegram
+    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    const tgName = tgUser
+      ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ")
+      : "";
+
+    // Email из последней заявки
+    api.getMyProfile()
+      .then((profile) => {
+        setForm((f) => ({
+          ...f,
+          name: f.name || profile.user_name || tgName || "",
+          email: f.email || profile.user_email || "",
+        }));
+      })
+      .catch(() => {
+        // API недоступен — хотя бы имя из Telegram
+        if (tgName) {
+          setForm((f) => ({ ...f, name: f.name || tgName }));
+        }
+      });
+  }, [prefilled]);
 
   // Открытие по прямой ссылке #/book?w=6 — сразу показываем шаг «неделя» с этим смещением
   useEffect(() => {

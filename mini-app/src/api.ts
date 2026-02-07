@@ -100,6 +100,8 @@ export const api = {
     request<MyMeetingsResponse>(`/my/meetings?page=${page}&limit=${limit}`),
   cancelMeeting: (meetingId: number) =>
     request<{ ok: boolean }>(`/my/meetings/${meetingId}/cancel`, { method: "POST" }),
+  getMyProfile: () =>
+    request<{ user_name: string | null; user_email: string | null }>("/my/profile"),
 
   // Admin (требует user_id == ADMIN_ID)
   admin: {

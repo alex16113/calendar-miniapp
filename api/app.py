@@ -255,6 +255,8 @@ async def my_meetings(
             "subject": (m.subject or "").strip() or None,
             "duration": m.duration,
             "google_event_html_link": m.google_event_html_link if m.status == "confirmed" else None,
+            "user_name": getattr(m, "user_name", None),
+            "user_email": getattr(m, "user_email", None),
         })
     return {
         "total": total,
@@ -262,6 +264,22 @@ async def my_meetings(
         "limit": limit,
         "total_pages": total_pages,
         "items": items,
+    }
+
+
+@app.get("/my/profile")
+async def my_profile(user_id: int = Depends(get_telegram_user_id)):
+    """
+    Возвращает user_name и user_email из последней заявки пользователя.
+    Используется для автозаполнения формы бронирования.
+    """
+    from database import get_db
+
+    db = get_db()
+    last = db.get_last_meeting_by_user(user_id)
+    return {
+        "user_name": last.user_name if last else None,
+        "user_email": last.user_email if last else None,
     }
 
 

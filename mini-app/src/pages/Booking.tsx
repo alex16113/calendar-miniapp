@@ -200,7 +200,7 @@ export default function Booking() {
         {/* Шаг: длительность */}
         {step === "duration" && (
           <>
-            <p className="page-section-label">Длительность</p>
+            <p className="page-section-label">Выберите длительность планируемой встречи</p>
             <div className="glass-panel">
               {DURATIONS.map((m) => (
                 <button
@@ -225,9 +225,10 @@ export default function Booking() {
         {/* Шаг: выбор недели и дня */}
         {step === "week" && (
           <>
-            <p className="page-section-label">
-              Неделя {getWeekRangeLabel(weekOffset)}
-            </p>
+            <div className="week-badge">
+              <span className="week-badge-icon">📆</span>
+              <span className="week-badge-text">{getWeekRangeLabel(weekOffset)}</span>
+            </div>
             {loading && !weekData ? (
               <div className="glass-loading">
                 <span className="spinner"></span>
@@ -263,8 +264,8 @@ export default function Booking() {
             <Link to={`/book?w=${weekOffset + 1}`} className="glass-btn glass-btn-accent" style={{ marginTop: 8 }}>
               Следующая неделя →
             </Link>
-            <button type="button" className="glass-btn-ghost" onClick={() => setStep("duration")} style={{ width: "100%", marginTop: 8 }}>
-              ← Другая длительность
+            <button type="button" className="glass-btn glass-btn-muted" onClick={() => setStep("duration")} style={{ marginTop: 8 }}>
+              ← Изменить длительность
             </button>
           </>
         )}

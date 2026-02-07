@@ -87,7 +87,7 @@ export default function Home() {
             <div className="glass-card-content">
               <div className="glass-card-icon">📋</div>
               <div className="glass-card-text">
-                <h2 className="glass-card-title">Мои записи</h2>
+                <h2 className="glass-card-title">Мои заявки</h2>
                 <p className="glass-card-subtitle">Предстоящие встречи</p>
               </div>
             </div>

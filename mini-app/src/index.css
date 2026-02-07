@@ -1042,6 +1042,164 @@ h2 {
   .glass-empty-text { color: var(--tg-hint); }
 }
 
+/* ========== Meeting Cards (Мои заявки) ========== */
+
+.meeting-card {
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.2s;
+}
+
+.meeting-card:active {
+  transform: scale(0.99);
+}
+
+.meeting-card-even {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.meeting-card-odd {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+@media (prefers-color-scheme: light) {
+  .meeting-card-even {
+    background: rgba(255, 255, 255, 0.6);
+    border-color: rgba(255, 255, 255, 0.8);
+  }
+  .meeting-card-odd {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(255, 255, 255, 0.9);
+  }
+}
+
+.meeting-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.meeting-card-date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+
+.meeting-card-date-icon {
+  font-size: 18px;
+}
+
+@media (prefers-color-scheme: light) {
+  .meeting-card-date { color: #1e293b; }
+}
+
+.meeting-status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.meeting-status-pending {
+  background: rgba(255, 149, 0, 0.2);
+  color: #ffb340;
+  border: 1px solid rgba(255, 149, 0, 0.25);
+}
+
+.meeting-status-confirmed {
+  background: rgba(52, 199, 89, 0.2);
+  color: #4ade80;
+  border: 1px solid rgba(52, 199, 89, 0.25);
+}
+
+@media (prefers-color-scheme: light) {
+  .meeting-status-pending {
+    background: rgba(255, 149, 0, 0.12);
+    color: #d97706;
+    border-color: rgba(255, 149, 0, 0.2);
+  }
+  .meeting-status-confirmed {
+    background: rgba(52, 199, 89, 0.12);
+    color: #16a34a;
+    border-color: rgba(52, 199, 89, 0.2);
+  }
+}
+
+.meeting-card-subject {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 14px;
+}
+
+@media (prefers-color-scheme: light) {
+  .meeting-card-subject { color: rgba(30, 41, 59, 0.55); }
+}
+
+.meeting-card-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.meeting-card-action-cancel {
+  background: rgba(255, 59, 48, 0.15);
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 59, 48, 0.2);
+}
+
+.meeting-card-action-cancel:active {
+  background: rgba(255, 59, 48, 0.3);
+}
+
+@media (prefers-color-scheme: light) {
+  .meeting-card-action-cancel {
+    background: rgba(255, 59, 48, 0.08);
+    color: var(--destructive);
+    border-color: rgba(255, 59, 48, 0.15);
+  }
+}
+
+.meeting-card-action-calendar {
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.meeting-card-action-calendar:active {
+  background: rgba(99, 102, 241, 0.3);
+}
+
+@media (prefers-color-scheme: light) {
+  .meeting-card-action-calendar {
+    background: rgba(99, 102, 241, 0.08);
+    color: #4f46e5;
+    border-color: rgba(99, 102, 241, 0.15);
+  }
+}
+
 /* Error на glass фоне */
 .glass-error {
   background: rgba(255, 59, 48, 0.15);

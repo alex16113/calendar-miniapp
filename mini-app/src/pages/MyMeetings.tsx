@@ -50,61 +50,59 @@ export default function MyMeetings() {
   const totalPages = data?.total_pages ?? 1;
 
   return (
-    <div>
-      <h1>Мои заявки</h1>
-      <Link to="/" className="back-link">
-        ← Назад
-      </Link>
+    <>
+      <div className="mesh-gradient-bg" />
+      <div className="page">
+        <Link to="/" className="page-back">← Назад</Link>
+        <h1 className="page-title">Мои заявки</h1>
 
-      {loading && !data && (
-        <div className="loading">
-          <span className="spinner"></span>
-          Загрузка заявок...
-        </div>
-      )}
-
-      {error && (
-        <div className="error-message">{error}</div>
-      )}
-
-      {!loading && !error && list.length === 0 && (
-        <div className="empty-state">
-          <div className="empty-state-icon">📋</div>
-          <div className="empty-state-title">Нет заявок</div>
-          <div className="empty-state-text">
-            У вас пока нет заявок на встречи. Создайте новую, чтобы забронировать время.
+        {loading && !data && (
+          <div className="glass-loading">
+            <span className="spinner"></span>
+            Загрузка заявок...
           </div>
-          <Link to="/book" style={{ textDecoration: "none", marginTop: 24 }}>
-            <button type="button" className="btn">
-              Создать заявку
-            </button>
-          </Link>
-        </div>
-      )}
+        )}
 
-      {list.length > 0 && (
-        <>
-          <p className="section-title">Все заявки</p>
-          <div className="group">
+        {error && <div className="glass-error">{error}</div>}
+
+        {!loading && !error && list.length === 0 && (
+          <div className="glass-empty">
+            <div className="glass-empty-icon">📋</div>
+            <div className="glass-empty-title">Нет заявок</div>
+            <div className="glass-empty-text">
+              У вас пока нет записей. Создайте новую, чтобы забронировать время.
+            </div>
+            <Link to="/book" className="glass-btn glass-btn-accent" style={{ marginTop: 24 }}>
+              Создать заявку
+            </Link>
+          </div>
+        )}
+
+        {list.length > 0 && (
+          <>
             {list.map((m, idx) => (
               <div
                 key={m.id}
-                className="group-item"
-                style={{ borderBottom: idx === list.length - 1 ? "none" : undefined }}
+                className={`meeting-card ${idx % 2 === 0 ? "meeting-card-even" : "meeting-card-odd"}`}
               >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-                  <div style={{ fontWeight: 600, fontSize: 16 }}>{m.start_local}</div>
-                  <span className={`status-badge status-${m.status}`}>
+                <div className="meeting-card-header">
+                  <div className="meeting-card-date">
+                    <span className="meeting-card-date-icon">📅</span>
+                    <span>{m.start_local}</span>
+                  </div>
+                  <span className={`meeting-status meeting-status-${m.status}`}>
                     {m.status === "pending" ? "Ожидание" : "Подтверждено"}
                   </span>
                 </div>
-                <div style={{ fontSize: 14, color: "var(--tg-hint)", marginBottom: 12 }}>
+
+                <div className="meeting-card-subject">
                   {m.subject || "Без темы"}
                 </div>
+
                 {m.status === "pending" && (
                   <button
                     type="button"
-                    className="btn btn-destructive btn-small"
+                    className="meeting-card-action meeting-card-action-cancel"
                     onClick={() => cancel(m.id)}
                   >
                     Отменить заявку
@@ -115,42 +113,42 @@ export default function MyMeetings() {
                     href={m.google_event_html_link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ display: "inline-block", color: "var(--tg-button)", fontSize: 14, fontWeight: 500 }}
+                    className="meeting-card-action meeting-card-action-calendar"
                   >
-                    Открыть в Google Calendar →
+                    📎 Открыть в Google Calendar
                   </a>
                 )}
               </div>
             ))}
-          </div>
 
-          {totalPages > 1 && (
-            <div style={{ display: "flex", gap: 12, marginTop: 16, alignItems: "center", justifyContent: "center" }}>
-              <button
-                type="button"
-                className="btn btn-small"
-                style={{ width: "auto", paddingLeft: 24, paddingRight: 24 }}
-                disabled={page === 0}
-                onClick={() => setPage((p) => p - 1)}
-              >
-                ← Назад
-              </button>
-              <span style={{ color: "var(--tg-hint)", fontSize: 14 }}>
-                Страница {page + 1} из {totalPages}
-              </span>
-              <button
-                type="button"
-                className="btn btn-small"
-                style={{ width: "auto", paddingLeft: 24, paddingRight: 24 }}
-                disabled={page >= totalPages - 1}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                Вперёд →
-              </button>
-            </div>
-          )}
-        </>
-      )}
-    </div>
+            {totalPages > 1 && (
+              <div style={{ display: "flex", gap: 12, marginTop: 20, alignItems: "center", justifyContent: "center" }}>
+                <button
+                  type="button"
+                  className="glass-btn glass-btn-muted"
+                  style={{ width: "auto", padding: "10px 24px", fontSize: 14 }}
+                  disabled={page === 0}
+                  onClick={() => setPage((p) => p - 1)}
+                >
+                  ←
+                </button>
+                <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>
+                  {page + 1} / {totalPages}
+                </span>
+                <button
+                  type="button"
+                  className="glass-btn glass-btn-muted"
+                  style={{ width: "auto", padding: "10px 24px", fontSize: 14 }}
+                  disabled={page >= totalPages - 1}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  →
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </>
   );
 }

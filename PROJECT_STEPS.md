@@ -1,6 +1,6 @@
 ---
 
-## last_updated: 2026-02-06
+## last_updated: 2026-02-07
 
 project: Smart Scheduler
 
@@ -77,6 +77,79 @@ project: Smart Scheduler
 - **Прод**: бот развёрнут на VPS через Dokploy (Deploy from Git, образ из репо).
 - **Данные**: host-path `/opt/calendar-data` → `/app/data` в контейнере; `Dockerfile` и `.dockerignore` в корне.
 - Документация обновлена: `HANDOFF.md`, `README.md`; план по Mini App вынесен в `MINI_APP_ROADMAP.md`.
+
+## Сводка фактически внедрённых правок (2026-02-07, деплой Mini App + отладка)
+
+### Деплой Mini App на Dokploy (calendar.vpncfo.ru)
+
+- **Полный цикл разработки**: этапы 1-8 по `MINI_APP_ROADMAP.md` реализованы (backend API + Mini App frontend)
+- **Один контейнер**: бот (polling) + FastAPI (uvicorn :8000) + статика Mini App из `dist/`
+- **Multi-stage Dockerfile**: Node 20 собирает mini-app → Python 3.11 с backend + dist
+- **Домен и HTTPS**: calendar.vpncfo.ru через Dokploy прокси
+- **Menu Button**: настроен в @BotFather для запуска Mini App
+
+### Отладка белого экрана и валидации initData
+
+Столкнулись с серией проблем при деплое Mini App в Telegram. Все решены:
+
+#### 1. Белый экран в Telegram WebView
+- **Проблема**: `Telegram.WebApp.ready()` вызывался в React useEffect (слишком поздно)
+- **Решение**: переместили инициализацию в `mini-app/index.html` (синхронный скрипт до React)
+- **Файлы**: `mini-app/index.html`, `mini-app/src/App.tsx`
+
+#### 2. React Router "No routes matched location"
+- **Проблема**: Telegram добавляет служебные параметры к URL, роутер не находит роут
+- **Решение**: добавили fallback route `<Route path="*" element={<Navigate to="/" />} />`
+- **Файлы**: `mini-app/src/App.tsx`
+
+#### 3. 401/422 ошибки валидации initData (главная проблема)
+- **Проблема**: Telegram Bot API 8.0+ (ноябрь 2024) ввёл **новый формат валидации** с полем `signature` вместо `hash`
+- **Старый формат**: `hash` + HMAC-SHA256 с bot_token
+- **Новый формат**: `signature` + **Ed25519** с публичным ключом Telegram
+- **Решение**: полностью переписали `api/telegram_webapp.py` — поддержка обоих форматов:
+  - HMAC: исключаем только `hash` из data_check_string (оставляем `signature` если есть)
+  - Ed25519: исключаем оба, добавляем префикс `{bot_id}:WebAppData\n`, верифицируем через публичный ключ Telegram
+  - Пробуем оба метода последовательно (если данные содержат оба поля)
+- **Зависимости**: добавлен `cryptography>=43.0.0` для Ed25519
+- **Файлы**: `api/telegram_webapp.py`, `api/deps.py`, `requirements.txt`
+- **Документация**: https://docs.telegram-mini-apps.com/platform/init-data#using-telegram-public-key
+
+#### 4. API параметр date_str vs date
+- **Проблема**: клиент отправлял `date`, API ожидал `date_str` → 422 ошибка при выборе дня
+- **Решение**: переименовали параметр в `api/app.py` с `date_str` на `date`
+- **Файлы**: `api/app.py`
+
+#### 5. Дополнительные улучшения
+- **ErrorBoundary**: компонент для отлова ошибок React в production (`mini-app/src/ErrorBoundary.tsx`)
+- **Расширенный CORS**: добавлен regex для всех Telegram origins (`api/app.py`)
+- **Детальное логирование**: на всех этапах загрузки клиента и валидации сервера
+- **Визуальные индикаторы**: статус загрузки прямо в HTML (без DevTools)
+- **Сообщение об ошибке**: если initData отсутствует, показываем инструкцию (`mini-app/src/pages/Home.tsx`)
+
+### Документация отладки (для будущего)
+
+Созданы гайды:
+- **LESSONS_MINIAPP_DEBUG.md** — детальный разбор всех проблем и решений
+- **TROUBLESHOOT_MINIAPP.md** — диагностика белого экрана
+- **DEBUG_TELEGRAM_WEBVIEW.md** — отладка загрузки в WebView
+- **FIX_BOTFATHER.md** — настройка Menu Button
+- **FIX_401_ERRORS.md**, **CHECK_BOT_TOKEN.md**, **QUICK_FIX.md** — исправление ошибок авторизации
+
+### Статус: ✅ ГОТОВО
+
+- ✅ Mini App открывается в Telegram через Menu Button
+- ✅ Валидация initData работает (HMAC + Ed25519)
+- ✅ Загрузка недель с доступными днями
+- ✅ Загрузка слотов времени на день
+- ✅ Создание заявок работает
+- ✅ Уведомления админу приходят
+
+### Следующие шаги
+
+1. Доработка дизайна форм (по Design Spec из `MINI_APP_ROADMAP.md`)
+2. Тестирование всех экранов: запись, "Мои заявки", админка
+3. Полировка UX
+4. Убрать временные debug-логи (опционально)
 
 ---
 

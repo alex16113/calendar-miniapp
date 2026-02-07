@@ -1,10 +1,12 @@
-# Handoff для следующего агента (2026-02-07)
+# Handoff для следующего агента (2026-02-07, обновлено)
 
 Проект: **Calendar Mini App** — Telegram-бот + Mini App для записи на встречи. Деплой: Dokploy, домен calendar.vpncfo.ru.
 
 ## Где остановились
 
-Реализованы **этапы 1–8** по `MINI_APP_ROADMAP.md`. **Деплой готов**: один образ (бот + uvicorn + статика Mini App). Дальше: задеплоить на Dokploy (calendar.vpncfo.ru), проверить в Telegram слоты, запись, «Мои заявки», админку.
+✅ **Этапы 1–8 реализованы и задеплоены на Dokploy**. Mini App работает в Telegram (calendar.vpncfo.ru). Отладка завершена — валидация initData (HMAC + Ed25519), загрузка слотов, создание заявок работают.
+
+**Следующий шаг:** доработка дизайна и UX (по Design Spec из `MINI_APP_ROADMAP.md`), тестирование всех экранов (запись, "Мои заявки", админка).
 
 ## Что уже сделано
 
@@ -44,9 +46,11 @@
 - **Админский экран** `/#/admin`: список pending с кнопками Подтвердить/Отклонить/В бан, пагинация; при 403 — «Доступ только для администратора».
 - На главной блок «Админка» виден только админу (проверка через GET /admin/settings при загрузке).
 
-### Этап 8 — Деплой
-- **FastAPI**: раздача статики Mini App из `dist/` (StaticFiles, `html=True` для SPA fallback); CORS для `https://calendar.vpncfo.ru` и `https://web.telegram.org`; корень `/` отдаёт SPA (HashRouter — base URL не меняли).
+### Этап 8 — Деплой (✅ ГОТОВО)
+- **FastAPI**: раздача статики Mini App из `dist/` (StaticFiles, `html=True` для SPA fallback); CORS для `https://calendar.vpncfo.ru` и regex `https://.*\.telegram\.org` (поддержка всех Telegram origins); корень `/` отдаёт SPA (HashRouter).
 - **Dockerfile**: multi-stage — Node 20 собирает `mini-app` в `dist/`, финальный образ Python 3.11 копирует только backend + `dist/`; один `CMD ["python", "run.py"]` (бот в фоне + uvicorn :8000); каталог `/app/data` для volume (БД, OAuth).
+- **Dokploy**: задеплоено на calendar.vpncfo.ru, домен привязан, HTTPS через Let's Encrypt, volume `/app/data` примонтирован.
+- **Отладка**: исправлены проблемы с инициализацией Telegram SDK, React Router, валидацией initData (HMAC + Ed25519). См. `LESSONS_MINIAPP_DEBUG.md`.
 - Запуск образа: см. раздел «Запуск образа» ниже.
 
 ## Ключевые файлы
@@ -67,7 +71,7 @@
 - **Mini App (dev)**: `cd mini-app && npm install && npm run dev` (порт 5173, прокси на 8000).
 - **Тест API без Telegram**: `INIT_DATA=$(python scripts/gen_init_data.py TELEGRAM_USER_ID)` и `curl -H "X-Telegram-Init-Data: $INIT_DATA" http://localhost:8000/my/meetings`.
 
-## Изменения в процессе работы (сессия 2026-02-07)
+## Изменения в процессе работы (сессия 2026-02-07, до деплоя)
 
 - **Сборка**: исправлен синтаксис в `mini-app/src/App.tsx` (`tw?.expand?.?.()` → `tw?.expand?.()`).
 - **Venv**: путь в `.venv` заменён с `.../Calendar/.venv` на `.../Calendar miniapp/.venv` (pyvenv.cfg, activate, activate.csh, activate.fish); shebang в `bin/` из‑за пробела в пути использует симлинк без пробелов (см. выше).
@@ -75,6 +79,83 @@
 - **Запись (Booking)**: полный флоу (длительность → неделя → день → время → форма → успех); подпись недели по `weekOffset` на клиенте («Неделя 3–9 фев»); «Следующая неделя» — ссылка `Link to={/book?w=${weekOffset+1}}` для надёжного клика в WebView; поддержка прямой ссылки `#/book?w=6`; текст «Нет свободных дней на эту неделю» без точки, по центру; при ошибках API (401/404) — пустой список без сырого JSON в UI.
 - **Фон**: `body` и `#root` с `background: var(--tg-theme-bg-color)` (системная тема).
 - **Админка**: добавлены все админ-эндпоинты и экран `/#/admin`; блок «Админка» на главной показывается только если пользователь — админ (проверка GET /admin/settings).
+
+## Изменения в процессе работы (сессия 2026-02-07, деплой и отладка)
+
+### Деплой на Dokploy (calendar.vpncfo.ru)
+
+- **Репозиторий**: https://github.com/alex16113/calendar-miniapp (ветка `main`)
+- **Dokploy**: создано приложение, подключен GitHub, настроен автодеплой
+- **Домен**: calendar.vpncfo.ru привязан, HTTPS работает (Let's Encrypt)
+- **Volume**: `/app/data` для БД и OAuth файлов
+- **Env**: `BOT_TOKEN`, `ADMIN_ID`, `BOT_WEBAPP_URL=https://calendar.vpncfo.ru`, Google OAuth настройки
+- **Menu Button**: настроен в @BotFather → `/setmenubutton` → URL: `https://calendar.vpncfo.ru`
+
+### Отладка проблем (все решены ✅)
+
+#### Проблема 1: Белый экран в Telegram
+- **Симптом**: через браузер работает, в Telegram — белый экран
+- **Причина**: `Telegram.WebApp.ready()` в React useEffect (слишком поздно)
+- **Решение**: переместили инициализацию в `mini-app/index.html` (синхронный скрипт до React)
+- **Файлы**: `mini-app/index.html`, `mini-app/src/App.tsx`
+
+#### Проблема 2: React Router не находит роуты
+- **Симптом**: загружается, но ничего не рендерится, `No routes matched location`
+- **Причина**: Telegram добавляет служебные параметры к URL
+- **Решение**: добавили fallback route `<Route path="*" element={<Navigate to="/" />} />`
+- **Файлы**: `mini-app/src/App.tsx`
+
+#### Проблема 3: 401 ошибки валидации initData (критическая)
+- **Симптом**: все API запросы возвращают 401 "Invalid or expired init data"
+- **Причина**: Telegram Bot API 8.0+ (ноябрь 2024) ввёл **новый формат валидации** — Ed25519 с полем `signature` вместо HMAC с полем `hash`
+- **Ключевая находка**: initData может содержать **оба поля** (`hash` и `signature`) одновременно; при HMAC валидации `signature` **должна оставаться** в data_check_string (исключается только `hash`); при Ed25519 исключаются оба
+- **Решение**: полностью переписали `api/telegram_webapp.py`:
+  - Поддержка обоих форматов (HMAC и Ed25519)
+  - Определение формата по наличию полей
+  - Последовательная проверка обоих методов
+  - Правильный порядок параметров: `hmac.new(key=b"WebAppData", msg=bot_token, ...)`
+  - Ed25519 верификация через публичный ключ Telegram: `e7bf03a2fa4602af4580703d88dda5bb59f32ed8b02a56c187fe7d34caed242d`
+- **Зависимости**: добавлен `cryptography>=43.0.0` для Ed25519
+- **Файлы**: `api/telegram_webapp.py`, `api/deps.py`, `requirements.txt`
+- **Документация**: https://docs.telegram-mini-apps.com/platform/init-data
+
+#### Проблема 4: 422 при выборе дня
+- **Симптом**: недели грузятся, при клике на день — 422 ошибка
+- **Причина**: API ожидал параметр `date_str`, клиент отправлял `date`
+- **Решение**: переименовали параметр в API с `date_str` на `date`
+- **Файлы**: `api/app.py`
+
+### Дополнительные улучшения
+
+- **ErrorBoundary**: компонент для отлова ошибок React (`mini-app/src/ErrorBoundary.tsx`)
+- **Детальное логирование**: клиент (`mini-app/src/api.ts`, `App.tsx`, `main.tsx`, `index.html`) и сервер (`api/deps.py`, `api/telegram_webapp.py`)
+- **Визуальные индикаторы**: статус загрузки в HTML (до React), сообщение если initData пустой (`mini-app/src/pages/Home.tsx`)
+- **CORS**: расширен regex `https://.*\.telegram\.org` для поддержки всех Telegram origins (iOS/Android WebView)
+- **Env для отладки**: `LOG_LEVEL=DEBUG`, `DISABLE_INIT_DATA_CHECK=1` (временно), `INIT_DATA_MAX_AGE_SECONDS` (`.env.example`)
+
+### Документация для будущего
+
+- **LESSONS_MINIAPP_DEBUG.md** — детальный разбор всех 4 проблем с объяснениями
+- **TROUBLESHOOT_MINIAPP.md** — общая диагностика проблем
+- **DEBUG_*.md** — специфичные гайды по каждой проблеме
+- **DEPLOY_DOKPLOY.md** — обновлён с учётом реального деплоя
+
+### Текущий статус (2026-02-07, 12:00)
+
+✅ **Всё работает:**
+- Mini App открывается в Telegram через Menu Button
+- Валидация initData (HMAC + Ed25519)
+- Загрузка недель и дней с доступными слотами
+- Выбор времени
+- Создание заявок (pending)
+- Уведомления админу в чат с кнопками модерации
+
+🔧 **TODO (следующая сессия):**
+- Доработка дизайна форм (Apple-like по Design Spec)
+- Тестирование экрана "Мои заявки"
+- Тестирование админки в Mini App
+- Полировка UX
+- Опционально: убрать временные debug-логи
 
 ## Установка через GitHub — что делать дальше
 

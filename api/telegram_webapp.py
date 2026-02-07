@@ -68,10 +68,11 @@ def validate_init_data(
     logger.debug(f"Filtered params keys: {list(filtered_params.keys())}")
     logger.debug(f"data_check_string preview: {data_check_string[:100]}...")
 
-    # secret_key = HMAC_SHA256(bot_token, "WebAppData")
+    # secret_key = HMAC_SHA256("WebAppData", bot_token)
+    # ВАЖНО: порядок параметров критичен! Сначала ключ, потом сообщение.
     secret_key = hmac.new(
-        bot_token.encode(),
         b"WebAppData",
+        bot_token.encode(),
         hashlib.sha256,
     ).digest()
 

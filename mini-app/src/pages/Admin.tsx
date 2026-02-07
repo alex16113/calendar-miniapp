@@ -172,7 +172,11 @@ export default function Admin() {
     <>
       <div className="mesh-gradient-bg" />
       <div className="page">
-        <Link to="/" className="page-back">← Назад</Link>
+        {screen === "menu" ? (
+          <Link to="/" className="page-back">← Назад</Link>
+        ) : (
+          <button type="button" className="page-back" onClick={goToMenu}>← Назад</button>
+        )}
         <h1 className="page-title">Админ-панель</h1>
 
         {error && <div className="glass-error">{error}</div>}
@@ -300,7 +304,7 @@ function AdminPendingList({
   limit,
   loading,
   onPageChange,
-  onBack,
+  onBack: _onBack,
   onConfirm,
   onReject,
   onBan,
@@ -318,9 +322,6 @@ function AdminPendingList({
 }) {
   return (
     <>
-      <button type="button" className="glass-btn glass-btn-muted" style={{ marginBottom: 16 }} onClick={onBack}>
-        ← В меню
-      </button>
       <p className="page-section-label">Ожидающие заявки</p>
       {loading && pending.length === 0 ? (
         <div className="glass-loading">
@@ -401,7 +402,7 @@ function AdminPendingList({
 function AdminTimezone({
   current,
   onSaved,
-  onBack,
+  onBack: _onBack,
 }: {
   current: string;
   onSaved: (tz: string) => void;
@@ -425,7 +426,7 @@ function AdminTimezone({
     return (
       <>
         <button type="button" className="glass-btn glass-btn-muted" style={{ marginBottom: 16 }} onClick={() => setSub("list")}>
-          ← Назад
+          ← К списку таймзон
         </button>
         <p className="page-section-label">Введи таймзону (например Europe/Moscow)</p>
         <div className="glass-panel">
@@ -451,9 +452,6 @@ function AdminTimezone({
 
   return (
     <>
-      <button type="button" className="glass-btn glass-btn-muted" style={{ marginBottom: 16 }} onClick={onBack}>
-        ← В меню
-      </button>
       <p className="page-section-label">Выбери таймзону:</p>
       <div className="glass-panel">
         <button
@@ -493,7 +491,7 @@ function AdminTimezone({
 function AdminWorkSchedule({
   workSchedule,
   onScheduleUpdate,
-  onBack,
+  onBack: _onBack,
 }: {
   workSchedule: AdminSettings["work_schedule"];
   onScheduleUpdate: (ws: AdminSettings["work_schedule"]) => void;
@@ -555,34 +553,36 @@ function AdminWorkSchedule({
   const dayLabel = WEEKDAY_LABELS[selectedWeekday]!;
 
   if (sub === "day_edit") {
+    const [startH, startM] = parseHHMM(editStart);
+    const [endH, endM] = parseHHMM(editEnd);
+    const setStart = (h: number, m: number) => setEditStart(formatHHMM(clampHour(h), clampMin(m)));
+    const setEnd = (h: number, m: number) => setEditEnd(formatHHMM(clampHour(h), clampMin(m)));
     return (
       <>
         <button type="button" className="glass-btn glass-btn-muted" style={{ marginBottom: 16 }} onClick={() => setSub("day")}>
           ← Назад
         </button>
         <p className="page-section-label">{dayLabel}: рабочие часы</p>
-        <div className="admin-time-summary">
+        <div className="admin-time-summary" style={{ marginBottom: 16 }}>
           <span className="admin-time-summary-icon">🕐</span>
           <span className="admin-time-summary-text">{editStart} – {editEnd}</span>
         </div>
         <div className="glass-panel" style={{ padding: 0 }}>
-          <div className="glass-form-group">
+          <div className="glass-form-group admin-time-row">
             <label className="glass-form-label">Начало</label>
-            <input
-              type="time"
-              className="glass-input admin-time-input"
-              value={editStart}
-              onChange={(e) => setEditStart(e.target.value)}
-            />
+            <div className="admin-time-boxes">
+              <input type="number" min={0} max={23} className="glass-input admin-time-box" value={startH} onChange={(e) => setStart(parseInt(e.target.value, 10) || 0, startM)} />
+              <span className="admin-time-sep">:</span>
+              <input type="number" min={0} max={59} className="glass-input admin-time-box" value={startM} onChange={(e) => setStart(startH, parseInt(e.target.value, 10) || 0)} />
+            </div>
           </div>
-          <div className="glass-form-group">
-            <label className="glass-form-label">Конец</label>
-            <input
-              type="time"
-              className="glass-input admin-time-input"
-              value={editEnd}
-              onChange={(e) => setEditEnd(e.target.value)}
-            />
+          <div className="glass-form-group admin-time-row">
+            <label className="glass-form-label">Окончание</label>
+            <div className="admin-time-boxes">
+              <input type="number" min={0} max={23} className="glass-input admin-time-box" value={endH} onChange={(e) => setEnd(parseInt(e.target.value, 10) || 0, endM)} />
+              <span className="admin-time-sep">:</span>
+              <input type="number" min={0} max={59} className="glass-input admin-time-box" value={endM} onChange={(e) => setEnd(endH, parseInt(e.target.value, 10) || 0)} />
+            </div>
           </div>
         </div>
         <button type="button" className="glass-btn glass-btn-accent" style={{ marginTop: 16, width: "100%" }} disabled={saving} onClick={handleSetHours}>
@@ -624,9 +624,6 @@ function AdminWorkSchedule({
 
   return (
     <>
-      <button type="button" className="glass-btn glass-btn-muted" style={{ marginBottom: 16 }} onClick={onBack}>
-        ← В меню
-      </button>
       <p className="page-section-label">Выбери день недели:</p>
       <div className="glass-panel" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
         {WEEKDAY_KEYS.map((key, i) => (
@@ -648,10 +645,24 @@ function int(s: string): number {
   return parseInt(s, 10);
 }
 
+function parseHHMM(s: string): [number, number] {
+  const [h, m] = (s || "00:00").split(":").map((x) => parseInt(x, 10) || 0);
+  return [Math.min(23, Math.max(0, h)), Math.min(59, Math.max(0, m))];
+}
+function formatHHMM(h: number, m: number): string {
+  return `${String(clampHour(h)).padStart(2, "0")}:${String(clampMin(m)).padStart(2, "0")}`;
+}
+function clampHour(h: number): number {
+  return Math.min(23, Math.max(0, Math.floor(Number(h)) || 0));
+}
+function clampMin(m: number): number {
+  return Math.min(59, Math.max(0, Math.floor(Number(m)) || 0));
+}
+
 function AdminBuffer({
   current,
   onSaved,
-  onBack,
+  onBack: _onBack,
 }: {
   current: number;
   onSaved: (buf: number) => void;
@@ -674,9 +685,6 @@ function AdminBuffer({
   };
   return (
     <>
-      <button type="button" className="glass-btn glass-btn-muted" style={{ marginBottom: 16 }} onClick={onBack}>
-        ← В меню
-      </button>
       <div className="glass-form-group">
         <label className="glass-form-label">Буфер (часы, 0–24)</label>
         <input
@@ -698,7 +706,7 @@ function AdminBuffer({
 function AdminBlacklist({
   dates,
   onChanged,
-  onBack,
+  onBack: _onBack,
 }: {
   dates: { date: string; reason: string | null }[];
   onChanged: () => void;
@@ -733,9 +741,6 @@ function AdminBlacklist({
   };
   return (
     <>
-      <button type="button" className="glass-btn glass-btn-muted" style={{ marginBottom: 16 }} onClick={onBack}>
-        ← В меню
-      </button>
       <p className="page-section-label">Добавить дату</p>
       <div className="glass-panel">
         <div className="glass-form-group">
@@ -793,7 +798,7 @@ function AdminBlacklist({
   );
 }
 
-function AdminBroadcast({ onBack }: { onBack: () => void }) {
+function AdminBroadcast({ onBack: _onBack }: { onBack: () => void }) {
   const [date, setDate] = useState("");
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
@@ -823,9 +828,6 @@ function AdminBroadcast({ onBack }: { onBack: () => void }) {
   };
   return (
     <>
-      <button type="button" className="glass-btn glass-btn-muted" style={{ marginBottom: 16 }} onClick={onBack}>
-        ← В меню
-      </button>
       <p className="page-section-label">Рассылка на дату</p>
       <div className="glass-panel">
         <div className="glass-form-group">

@@ -610,6 +610,14 @@ h2 {
   opacity: 0.5;
 }
 
+button.page-back {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+}
+
 @media (prefers-color-scheme: light) {
   .page-back {
     color: var(--tg-button);
@@ -934,13 +942,35 @@ h2 {
   }
 }
 
-/* Админ: поле времени — крупнее для удобного тапа */
-.admin-time-input {
-  padding: 14px 12px;
+/* Админ: окошки часы/минуты */
+.admin-time-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.admin-time-boxes {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.admin-time-box {
+  width: 56px;
+  padding: 10px 8px;
   font-size: 18px;
   font-weight: 600;
-  letter-spacing: 0.02em;
-  min-height: 48px;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+.admin-time-box::-webkit-outer-spin-button,
+.admin-time-box::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.admin-time-sep {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--tg-hint);
+  user-select: none;
 }
 
 /* Time grid для слотов */

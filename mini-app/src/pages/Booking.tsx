@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api, type WeekDay } from "../api";
+import { haptic } from "../utils/haptic";
 
 const DURATIONS = [15, 30, 60, 90] as const;
 const WEEKDAY_NAMES = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
@@ -172,10 +173,14 @@ export default function Booking() {
         email,
       })
       .then((res) => {
+        haptic.success();
         setMeetingId(res.meeting_id);
         setStep("success");
       })
-      .catch((e) => setError(e.message || "Ошибка отправки"))
+      .catch((e) => {
+        haptic.error();
+        setError(e.message || "Ошибка отправки");
+      })
       .finally(() => setLoading(false));
   };
 
@@ -183,35 +188,38 @@ export default function Booking() {
 
   return (
     <div>
-      <h1>Запрос встречи</h1>
+      <h1>Новая встреча</h1>
       {step !== "success" && (
-        <Link to="/" style={{ display: "block", marginBottom: 16, color: "var(--tg-button)", fontSize: 15 }}>← Назад</Link>
+        <Link to="/" className="back-link">
+          ← Назад
+        </Link>
       )}
 
       {error && (
-        <p style={{ color: "var(--destructive)", fontSize: 14, marginBottom: 12 }}>{error}</p>
+        <div className="error-message">{error}</div>
       )}
 
       {/* Шаг: длительность */}
       {step === "duration" && (
         <>
-          <p className="section-title">Длительность</p>
-          <div className="group" style={{ padding: 12 }}>
-            {DURATIONS.map((m) => (
-              <button
-                key={m}
-                type="button"
-                className="btn"
-                style={{ marginBottom: 8 }}
-                onClick={() => {
-                  setDuration(m);
-                  setWeekOffset(0);
-                  setWeekData(null);
-                  setStep("week");
-                }}
-              >
-                {m} мин
-              </button>
+          <p className="section-title">Длительность встречи</p>
+          <div className="group">
+            {DURATIONS.map((m, idx) => (
+              <div key={m} className="group-item" style={{ borderBottom: idx === DURATIONS.length - 1 ? "none" : undefined }}>
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => {
+                    haptic.selection();
+                    setDuration(m);
+                    setWeekOffset(0);
+                    setWeekData(null);
+                    setStep("week");
+                  }}
+                >
+                  {m} минут
+                </button>
+              </div>
             ))}
           </div>
         </>
@@ -220,25 +228,31 @@ export default function Booking() {
       {/* Шаг: выбор недели и дня */}
       {step === "week" && (
         <>
-          <p className="section-title" style={{ textAlign: "center" }}>
+          <p className="section-title">
             Неделя {getWeekRangeLabel(weekOffset)}
           </p>
           {loading && !weekData ? (
-            <p style={{ color: "var(--tg-hint)" }}>Загрузка…</p>
+            <div className="loading">
+              <span className="spinner"></span>
+              Загрузка доступных дней...
+            </div>
+          ) : daysWithSlots.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-state-icon">📅</div>
+              <div className="empty-state-title">Нет свободных дней</div>
+              <div className="empty-state-text">
+                На эту неделю свободных слотов нет. Попробуйте следующую.
+              </div>
+            </div>
           ) : (
-            <div className="group" style={{ padding: 12 }}>
-              {daysWithSlots.length === 0 ? (
-                <p style={{ color: "var(--tg-text)", fontSize: 15, fontWeight: 500, margin: 0, textAlign: "center" }}>
-                  Нет свободных дней на эту неделю
-                </p>
-              ) : (
-                daysWithSlots.map((d) => (
+            <div className="group">
+              {daysWithSlots.map((d, idx) => (
+                <div key={d.date} className="group-item" style={{ borderBottom: idx === daysWithSlots.length - 1 ? "none" : undefined }}>
                   <button
-                    key={d.date}
                     type="button"
                     className="btn"
-                    style={{ marginBottom: 8 }}
                     onClick={() => {
+                      haptic.selection();
                       setSelectedDate(d.date);
                       setStep("time");
                       setDaySlots([]);
@@ -246,17 +260,17 @@ export default function Booking() {
                   >
                     {formatDayLabel(d.date)}
                   </button>
-                ))
-              )}
+                </div>
+              ))}
             </div>
           )}
           <Link
             to={`/book?w=${weekOffset + 1}`}
-            style={{ display: "block", marginTop: 12, textDecoration: "none" }}
+            style={{ textDecoration: "none", display: "block", marginTop: 12 }}
           >
-            <span className="btn" style={{ display: "block", textAlign: "center" }}>
+            <button type="button" className="btn btn-secondary">
               Следующая неделя →
-            </span>
+            </button>
           </Link>
         </>
       )}
@@ -266,26 +280,40 @@ export default function Booking() {
         <>
           <p className="section-title">{formatDayLabel(selectedDate)}</p>
           {loading && daySlots.length === 0 ? (
-            <p style={{ color: "var(--tg-hint)" }}>Загрузка…</p>
+            <div className="loading">
+              <span className="spinner"></span>
+              Загрузка слотов...
+            </div>
+          ) : daySlots.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-state-icon">⏰</div>
+              <div className="empty-state-title">Нет свободных слотов</div>
+              <div className="empty-state-text">
+                На этот день все слоты заняты. Выберите другой день.
+              </div>
+            </div>
           ) : (
-            <div className="group" style={{ padding: 12, display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {daySlots.map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  className="btn"
-                  style={{ flex: "1 1 80px", minWidth: 80 }}
-                  onClick={() => {
-                    setSelectedTime(t);
-                    setStep("form");
-                  }}
-                >
-                  {t}
-                </button>
-              ))}
+            <div className="card">
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {daySlots.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    className="btn btn-small"
+                    style={{ flex: "1 1 calc(33.333% - 6px)", minWidth: 80 }}
+                    onClick={() => {
+                      haptic.selection();
+                      setSelectedTime(t);
+                      setStep("form");
+                    }}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
-          <button type="button" className="btn" style={{ background: "transparent", color: "var(--tg-button)" }} onClick={goBack}>
+          <button type="button" className="btn btn-destructive" onClick={goBack}>
             ← Другой день
           </button>
         </>
@@ -294,48 +322,69 @@ export default function Booking() {
       {/* Шаг: форма */}
       {step === "form" && selectedDate && selectedTime && (
         <form onSubmit={handleSubmitForm}>
-          <p className="section-title">Ваши данные</p>
-          <div className="group" style={{ padding: 16 }}>
-            <label className="label">Имя</label>
-            <input
-              className="input"
-              value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              placeholder="Как к вам обращаться"
-              required
-              style={{ marginBottom: 12 }}
-            />
-            <label className="label">Тема встречи</label>
-            <input
-              className="input"
-              value={form.subject}
-              onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))}
-              placeholder="Кратко"
-              required
-              style={{ marginBottom: 12 }}
-            />
-            <label className="label">Описание (необязательно)</label>
-            <input
-              className="input"
-              value={form.description}
-              onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-              placeholder="Ссылка на Zoom/Meet и т.п."
-              style={{ marginBottom: 12 }}
-            />
-            <label className="label">Email</label>
-            <input
-              type="email"
-              className="input"
-              value={form.email}
-              onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-              placeholder="email@example.com"
-              required
-            />
+          <div className="card" style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 15, color: "var(--tg-hint)", marginBottom: 8 }}>
+              Выбранное время
+            </div>
+            <div style={{ fontSize: 18, fontWeight: 600, color: "var(--tg-text)" }}>
+              {formatDayLabel(selectedDate)} в {selectedTime}
+            </div>
           </div>
-          <button type="submit" className="btn" disabled={loading}>
-            {loading ? "Отправка…" : "Отправить"}
+
+          <p className="section-title">Ваши данные</p>
+          <div className="group">
+            <div className="group-item">
+              <label className="label">Имя</label>
+              <input
+                className="input"
+                value={form.name}
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                placeholder="Как к вам обращаться"
+                required
+              />
+            </div>
+            <div className="group-item">
+              <label className="label">Тема встречи</label>
+              <input
+                className="input"
+                value={form.subject}
+                onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))}
+                placeholder="О чём встреча"
+                required
+              />
+            </div>
+            <div className="group-item">
+              <label className="label">Email</label>
+              <input
+                type="email"
+                className="input"
+                value={form.email}
+                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                placeholder="email@example.com"
+                required
+              />
+            </div>
+            <div className="group-item">
+              <label className="label">Описание (необязательно)</label>
+              <input
+                className="input"
+                value={form.description}
+                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                placeholder="Дополнительная информация"
+              />
+            </div>
+          </div>
+          <button type="submit" className="btn" disabled={loading} style={{ marginTop: 16 }}>
+            {loading ? (
+              <>
+                <span className="spinner" style={{ marginRight: 8 }}></span>
+                Отправка...
+              </>
+            ) : (
+              "Отправить заявку"
+            )}
           </button>
-          <button type="button" className="btn btn-destructive" style={{ marginTop: 8 }} onClick={goBack}>
+          <button type="button" className="btn btn-destructive" style={{ marginTop: 12 }} onClick={goBack}>
             ← Другое время
           </button>
         </form>
@@ -344,12 +393,25 @@ export default function Booking() {
       {/* Успех */}
       {step === "success" && (
         <>
-          <p style={{ color: "var(--tg-text)", marginBottom: 16 }}>
-            Заявка {meetingId != null ? `#${meetingId} ` : ""}отправлена. Мы свяжемся с вами после подтверждения.
-          </p>
-          <div className="nav-links">
-            <Link to="/my">Мои заявки</Link>
-            <Link to="/">На главную</Link>
+          <div className="success-message" style={{ marginTop: 24, textAlign: "center", padding: 24 }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>✓</div>
+            <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>Заявка отправлена!</div>
+            <div style={{ fontSize: 15 }}>
+              {meetingId != null && `Номер заявки: #${meetingId}. `}
+              Мы отправим уведомление после подтверждения встречи.
+            </div>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 24 }}>
+            <Link to="/my" style={{ textDecoration: "none" }}>
+              <button type="button" className="btn btn-secondary">
+                Мои заявки
+              </button>
+            </Link>
+            <Link to="/" style={{ textDecoration: "none" }}>
+              <button type="button" className="btn">
+                На главную
+              </button>
+            </Link>
           </div>
         </>
       )}

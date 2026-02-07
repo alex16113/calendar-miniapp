@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { api, type AdminPendingItem } from "../api";
+import { haptic } from "../utils/haptic";
 
 export default function Admin() {
   const [pending, setPending] = useState<AdminPendingItem[]>([]);
@@ -45,109 +46,164 @@ export default function Admin() {
   };
 
   const handleConfirm = (id: number) => {
+    haptic.medium();
     api.admin
       .confirmMeeting(id)
-      .then(() => removeFromList(id))
-      .catch((e) => alert(e.message || "Ошибка"));
+      .then(() => {
+        haptic.success();
+        removeFromList(id);
+      })
+      .catch((e) => {
+        haptic.error();
+        alert(e.message || "Ошибка");
+      });
   };
 
   const handleReject = (id: number) => {
     if (!confirm("Отклонить заявку?")) return;
+    haptic.medium();
     api.admin
       .rejectMeeting(id)
-      .then(() => removeFromList(id))
-      .catch((e) => alert(e.message || "Ошибка"));
+      .then(() => {
+        haptic.success();
+        removeFromList(id);
+      })
+      .catch((e) => {
+        haptic.error();
+        alert(e.message || "Ошибка");
+      });
   };
 
   const handleBan = (id: number) => {
     if (!confirm("Отклонить и добавить пользователя в бан?")) return;
+    haptic.medium();
     api.admin
       .banMeeting(id)
-      .then(() => removeFromList(id))
-      .catch((e) => alert(e.message || "Ошибка"));
+      .then(() => {
+        haptic.success();
+        removeFromList(id);
+      })
+      .catch((e) => {
+        haptic.error();
+        alert(e.message || "Ошибка");
+      });
   };
 
   if (forbidden) {
     return (
       <div>
-        <h1>Админка</h1>
-        <p style={{ color: "var(--tg-hint)" }}>Доступ только для администратора. Откройте приложение из аккаунта владельца.</p>
-        <Link to="/" style={{ color: "var(--tg-button)", display: "block", marginTop: 16 }}>← На главную</Link>
+        <h1>Админ-панель</h1>
+        <div className="empty-state">
+          <div className="empty-state-icon">🔒</div>
+          <div className="empty-state-title">Доступ запрещён</div>
+          <div className="empty-state-text">
+            Эта страница доступна только администратору. Откройте приложение из аккаунта владельца.
+          </div>
+        </div>
+        <Link to="/" style={{ textDecoration: "none", marginTop: 24 }}>
+          <button type="button" className="btn">
+            На главную
+          </button>
+        </Link>
       </div>
     );
   }
 
   return (
     <div>
-      <h1>Админка</h1>
-      <Link to="/" style={{ display: "block", marginBottom: 16, color: "var(--tg-button)", fontSize: 15 }}>← Назад</Link>
+      <h1>Админ-панель</h1>
+      <Link to="/" className="back-link">
+        ← Назад
+      </Link>
 
-      {error && <p style={{ color: "var(--destructive)", marginBottom: 12 }}>{error}</p>}
+      {error && <div className="error-message">{error}</div>}
 
       <p className="section-title">Ожидающие заявки</p>
+      
       {loading && pending.length === 0 ? (
-        <p style={{ color: "var(--tg-hint)" }}>Загрузка…</p>
+        <div className="loading">
+          <span className="spinner"></span>
+          Загрузка заявок...
+        </div>
       ) : pending.length === 0 ? (
-        <div className="group" style={{ padding: 12 }}>
-          <p style={{ color: "var(--tg-hint)", margin: 0 }}>Нет заявок в ожидании</p>
+        <div className="empty-state">
+          <div className="empty-state-icon">✓</div>
+          <div className="empty-state-title">Нет заявок в ожидании</div>
+          <div className="empty-state-text">
+            Все заявки обработаны. Новые заявки появятся здесь автоматически.
+          </div>
         </div>
       ) : (
-        <div className="group" style={{ padding: 12 }}>
-          {pending.map((m) => (
-            <div
-              key={m.id}
-              style={{
-                padding: "12px 0",
-                borderBottom: "1px solid rgba(0,0,0,0.06)",
-              }}
-            >
-              <div style={{ fontWeight: 500 }}>{m.start_local}</div>
-              <div style={{ fontSize: 14, color: "var(--tg-hint)" }}>
-                {m.user_name || "—"} · {m.subject || "—"}
+        <>
+          <div className="group">
+            {pending.map((m, idx) => (
+              <div
+                key={m.id}
+                className="group-item"
+                style={{ borderBottom: idx === pending.length - 1 ? "none" : undefined }}
+              >
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 4 }}>
+                    {m.start_local}
+                  </div>
+                  <div style={{ fontSize: 14, color: "var(--tg-hint)" }}>
+                    {m.user_name || "Неизвестно"} · {m.subject || "Без темы"}
+                  </div>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                  <button 
+                    type="button" 
+                    className="btn btn-small" 
+                    onClick={() => handleConfirm(m.id)}
+                  >
+                    ✓ Подтвердить
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-small btn-destructive"
+                    onClick={() => handleReject(m.id)}
+                  >
+                    ✕ Отклонить
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-small btn-destructive"
+                    style={{ gridColumn: "1 / -1" }}
+                    onClick={() => handleBan(m.id)}
+                  >
+                    🚫 Отклонить и заблокировать
+                  </button>
+                </div>
               </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
-                <button type="button" className="btn" style={{ flex: "1 1 80px" }} onClick={() => handleConfirm(m.id)}>
-                  ✅ Подтвердить
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-destructive"
-                  style={{ flex: "1 1 80px" }}
-                  onClick={() => handleReject(m.id)}
-                >
-                  ❌ Отклонить
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-destructive"
-                  style={{ flex: "1 1 80px" }}
-                  onClick={() => handleBan(m.id)}
-                >
-                  🚫 В бан
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
 
-      {total > limit && (
-        <div style={{ display: "flex", gap: 8, marginTop: 16, justifyContent: "center" }}>
-          <button type="button" className="btn" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
-            ←
-          </button>
-          <span style={{ alignSelf: "center" }}>
-            {page + 1} / {Math.ceil(total / limit)}
-          </span>
-          <button
-            type="button"
-            className="btn"
-            disabled={page >= Math.ceil(total / limit) - 1}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            →
-          </button>
-        </div>
+          {total > limit && (
+            <div style={{ display: "flex", gap: 12, marginTop: 16, alignItems: "center", justifyContent: "center" }}>
+              <button 
+                type="button" 
+                className="btn btn-small" 
+                style={{ width: "auto", paddingLeft: 24, paddingRight: 24 }}
+                disabled={page === 0} 
+                onClick={() => setPage((p) => p - 1)}
+              >
+                ← Назад
+              </button>
+              <span style={{ color: "var(--tg-hint)", fontSize: 14 }}>
+                Страница {page + 1} из {Math.ceil(total / limit)}
+              </span>
+              <button
+                type="button"
+                className="btn btn-small"
+                style={{ width: "auto", paddingLeft: 24, paddingRight: 24 }}
+                disabled={page >= Math.ceil(total / limit) - 1}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Вперёд →
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

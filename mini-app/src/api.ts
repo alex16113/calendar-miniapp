@@ -2,14 +2,6 @@
  * API-клиент для бэкенда. Все запросы отправляют X-Telegram-Init-Data из WebApp.
  */
 
-declare global {
-  interface Window {
-    Telegram?: {
-      WebApp?: { initData: string };
-    };
-  }
-}
-
 const API_BASE = import.meta.env.VITE_API_URL || "";
 
 function getInitData(): string {

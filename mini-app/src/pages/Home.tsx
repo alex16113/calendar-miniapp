@@ -30,16 +30,17 @@ export default function Home() {
   // Если initData отсутствует - показываем инструкцию
   if (initDataMissing) {
     return (
-      <div style={{ padding: 20, textAlign: "center" }}>
-        <h2 style={{ fontSize: 18, marginBottom: 16 }}>⚠️ Приложение нужно открыть через Telegram</h2>
-        <p style={{ color: "var(--tg-theme-hint-color)", fontSize: 14, marginBottom: 12 }}>
+      <div className="empty-state">
+        <div className="empty-state-icon">⚠️</div>
+        <div className="empty-state-title">Приложение нужно открыть через Telegram</div>
+        <div className="empty-state-text">
           Это приложение работает только при запуске из Telegram-бота.
-        </p>
-        <div style={{ textAlign: "left", maxWidth: 400, margin: "0 auto", fontSize: 14, color: "var(--tg-theme-hint-color)" }}>
-          <p style={{ marginBottom: 8 }}><strong>Как открыть правильно:</strong></p>
-          <ol style={{ paddingLeft: 20 }}>
+        </div>
+        <div className="card" style={{ marginTop: 24, textAlign: "left" }}>
+          <div style={{ fontWeight: 600, marginBottom: 12, fontSize: 15 }}>Как открыть правильно:</div>
+          <ol style={{ paddingLeft: 20, margin: 0, fontSize: 14, lineHeight: 1.6 }}>
             <li style={{ marginBottom: 8 }}>Найди бота <strong>@google_calendar_booking1_bot</strong> в Telegram</li>
-            <li style={{ marginBottom: 8 }}>Нажми кнопку <strong>"Открыть приложение"</strong> внизу (рядом с полем ввода)</li>
+            <li style={{ marginBottom: 8 }}>Нажми кнопку <strong>"Открыть приложение"</strong> внизу</li>
             <li>Если кнопки нет — напиши <code>/start</code></li>
           </ol>
         </div>
@@ -49,56 +50,56 @@ export default function Home() {
 
   return (
     <div>
-      <h1 style={{ textAlign: "center" }}>Запись. Календарь Алексея.</h1>
-      <p style={{ color: "var(--tg-hint)", fontSize: 15, marginBottom: 16, textAlign: "center" }}>
-        Быстрый способ назначить встречу.
+      <h1>Запись встречи</h1>
+      <p style={{ color: "var(--tg-hint)", fontSize: 15, marginBottom: 24, lineHeight: 1.5 }}>
+        Выберите действие ниже. Бронирование занимает меньше минуты.
       </p>
 
-      <div className="group" style={{ padding: 16 }}>
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>
-            Новый запрос
+      <div className="card">
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 6, letterSpacing: "-0.3px" }}>
+            Новая встреча
           </div>
-          <div style={{ fontSize: 14, color: "var(--tg-hint)" }}>
-            Выбери длительность, дату и время — остальное подставится автоматически.
+          <div style={{ fontSize: 14, color: "var(--tg-hint)", lineHeight: 1.5 }}>
+            Выберите удобное время в календаре и заполните краткую форму.
           </div>
         </div>
-        <Link to="/book">
+        <Link to="/book" style={{ textDecoration: "none" }}>
           <button type="button" className="btn">
-            Записаться на встречу
+            Записаться
           </button>
         </Link>
       </div>
 
-      <div className="group" style={{ padding: 16 }}>
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>
+      <div className="card">
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 6, letterSpacing: "-0.3px" }}>
             Мои заявки
           </div>
-          <div style={{ fontSize: 14, color: "var(--tg-hint)" }}>
-            Подтверждённые и ожидающие встречи.
+          <div style={{ fontSize: 14, color: "var(--tg-hint)", lineHeight: 1.5 }}>
+            Просмотр подтверждённых и ожидающих встреч.
           </div>
         </div>
-        <Link to="/my">
-          <button type="button" className="btn">
-            Открыть список
+        <Link to="/my" style={{ textDecoration: "none" }}>
+          <button type="button" className="btn btn-secondary">
+            Открыть
           </button>
         </Link>
       </div>
 
       {isAdmin === true && (
-        <div className="group" style={{ padding: 16 }}>
-          <div style={{ marginBottom: 12 }}>
-            <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>
-              Админка
+        <div className="card">
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 6, letterSpacing: "-0.3px" }}>
+              Админ-панель
             </div>
-            <div style={{ fontSize: 14, color: "var(--tg-hint)" }}>
-              Ожидающие заявки, настройки, рассылка.
+            <div style={{ fontSize: 14, color: "var(--tg-hint)", lineHeight: 1.5 }}>
+              Управление заявками, настройки и модерация.
             </div>
           </div>
-          <Link to="/admin">
-            <button type="button" className="btn" style={{ background: "transparent", color: "var(--tg-button)" }}>
-              Открыть админку
+          <Link to="/admin" style={{ textDecoration: "none" }}>
+            <button type="button" className="btn btn-secondary">
+              Открыть
             </button>
           </Link>
         </div>

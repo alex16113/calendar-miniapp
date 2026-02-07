@@ -1014,6 +1014,11 @@ button.page-back {
   max-width: 200px;
 }
 
+/* Админ: пункты меню — выравнивание по левому краю */
+.admin-menu.glass-panel .glass-btn {
+  text-align: left;
+}
+
 /* Админ: username в заявке */
 .admin-username-line {
   font-size: 13px;

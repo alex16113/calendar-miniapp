@@ -19,22 +19,11 @@ const TZ_QUICK: { label: string; tz: string }[] = [
 
 type AdminScreen = "menu" | "pending" | "timezone" | "work" | "buffer" | "blacklist" | "broadcast";
 
-function formatWorkScheduleSummary(work_schedule: AdminSettings["work_schedule"]): string {
-  const parts: string[] = [];
-  for (const k of WEEKDAY_KEYS) {
-    const d = work_schedule[k];
-    if (!d?.enabled || !d.start || !d.end) continue;
-    parts.push(`${d.start}-${d.end}`);
-  }
-  if (parts.length === 0) return "Не задано";
-  const unique = [...new Set(parts)];
-  return unique.length === 1 ? unique[0]! : unique.join(", ");
-}
-
 export default function Admin() {
   const [screen, setScreen] = useState<AdminScreen>("menu");
   const [settings, setSettings] = useState<AdminSettings | null>(null);
   const [settingsLoading, setSettingsLoading] = useState(true);
+  const [pendingCount, setPendingCount] = useState<number | null>(null);
   const [pending, setPending] = useState<AdminPendingItem[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
@@ -69,7 +58,15 @@ export default function Admin() {
     return () => { cancelled = true; };
   }, []);
 
-  // Загрузка pending при открытии экрана «Ожидающие заявки»
+  // Количество заявок на согласование для меню (при открытии меню)
+  useEffect(() => {
+    if (screen !== "menu") return;
+    let cancelled = false;
+    api.admin.getPending(0, 1).then((res) => { if (!cancelled) setPendingCount(res.total); }).catch(() => { if (!cancelled) setPendingCount(0); });
+    return () => { cancelled = true; };
+  }, [screen]);
+
+  // Загрузка pending при открытии экрана «Список заявок на согласование»
   useEffect(() => {
     if (screen !== "pending") return;
     let cancelled = false;
@@ -94,12 +91,14 @@ export default function Admin() {
   const goToMenu = () => {
     setScreen("menu");
     setError(null);
+    setPendingCount(null);
     if (settings) api.admin.getSettings().then(setSettings).catch(() => {});
   };
 
   const removeFromList = (id: number) => {
     setPending((prev) => prev.filter((m) => m.id !== id));
     setTotal((t) => Math.max(0, t - 1));
+    setPendingCount((c) => (c != null ? Math.max(0, c - 1) : null));
   };
 
   const handleConfirm = (id: number) => {
@@ -185,6 +184,7 @@ export default function Admin() {
           <AdminMenu
             settings={settings}
             settingsLoading={settingsLoading}
+            pendingCount={pendingCount}
             onSelect={(s) => { haptic.selection(); setScreen(s); setError(null); }}
           />
         )}
@@ -247,10 +247,12 @@ export default function Admin() {
 function AdminMenu({
   settings,
   settingsLoading,
+  pendingCount,
   onSelect,
 }: {
   settings: AdminSettings | null;
   settingsLoading: boolean;
+  pendingCount: number | null;
   onSelect: (screen: AdminScreen) => void;
 }) {
   if (settingsLoading || !settings) {
@@ -261,19 +263,22 @@ function AdminMenu({
       </div>
     );
   }
-  const workSummary = formatWorkScheduleSummary(settings.work_schedule);
   return (
     <>
       <div className="glass-panel" style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 14, color: "var(--tg-hint)", marginBottom: 4 }}>Таймзона</div>
         <div style={{ fontWeight: 600 }}>{settings.timezone}</div>
-        <div style={{ fontSize: 14, color: "var(--tg-hint)", marginBottom: 4, marginTop: 12 }}>Рабочие часы</div>
-        <div style={{ fontWeight: 600 }}>{workSummary}</div>
         <div style={{ fontSize: 14, color: "var(--tg-hint)", marginBottom: 4, marginTop: 12 }}>Буфер</div>
         <div style={{ fontWeight: 600 }}>{settings.buffer_hours} ч</div>
+        {pendingCount != null && pendingCount > 0 && (
+          <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+            <div style={{ fontSize: 13, color: "var(--tg-hint)" }}>Заявки на согласование</div>
+            <div style={{ fontWeight: 600, color: "var(--tg-button)" }}>Есть неодобренные заявки: {pendingCount}</div>
+          </div>
+        )}
       </div>
       <p className="page-section-label">Выбери, что изменить:</p>
-      <div className="glass-panel">
+      <div className="glass-panel admin-menu">
         <button type="button" className="glass-btn" onClick={() => onSelect("pending")}>
           📁 Список заявок на согласование
         </button>

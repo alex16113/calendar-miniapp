@@ -33,6 +33,8 @@ def validate_init_data(
         Словарь с ключами из initData (user — уже распарсенный объект с id, first_name и т.д.),
         либо None при невалидных данных.
     """
+    logger.debug(f"validate_init_data called, data length: {len(init_data) if init_data else 0}")
+    
     if not init_data or not init_data.strip():
         logger.debug("initData is empty or whitespace")
         return None
@@ -48,11 +50,15 @@ def validate_init_data(
     if not received_hash:
         logger.debug("No hash field in initData")
         return None
+    
+    logger.debug(f"Parsed params keys: {list(params.keys())}")
+    logger.debug(f"Received hash: {received_hash[:16]}...")
 
     # data_check_string: все поля кроме hash, отсортированы по ключу, key=value через \n
     data_check_string = "\n".join(
         f"{k}={v}" for k, v in sorted(params.items())
     )
+    logger.debug(f"data_check_string preview: {data_check_string[:100]}...")
 
     # secret_key = HMAC_SHA256(bot_token, "WebAppData")
     secret_key = hmac.new(
@@ -69,21 +75,30 @@ def validate_init_data(
     ).hexdigest()
 
     if not hmac.compare_digest(computed_hash, received_hash):
-        logger.debug(f"HMAC mismatch: computed={computed_hash[:16]}..., received={received_hash[:16]}...")
+        logger.warning(f"HMAC mismatch! computed={computed_hash[:16]}..., received={received_hash[:16]}...")
+        logger.debug(f"Full computed hash: {computed_hash}")
+        logger.debug(f"Full received hash: {received_hash}")
         return None
+    
+    logger.debug("HMAC signature valid!")
 
     # Опционально: проверка возраста auth_date
     if max_auth_age_seconds > 0:
         auth_date_str = params.get("auth_date")
         if not auth_date_str:
+            logger.warning("No auth_date in initData")
             return None
         try:
             auth_date = int(auth_date_str)
         except ValueError:
+            logger.warning(f"Invalid auth_date format: {auth_date_str}")
             return None
         import time
-        if int(time.time()) - auth_date > max_auth_age_seconds:
-            logger.debug("initData auth_date too old")
+        current_time = int(time.time())
+        age_seconds = current_time - auth_date
+        logger.debug(f"auth_date age: {age_seconds}s (max: {max_auth_age_seconds}s)")
+        if age_seconds > max_auth_age_seconds:
+            logger.warning(f"initData auth_date too old: {age_seconds}s > {max_auth_age_seconds}s")
             return None
 
     # Парсим user (JSON) для удобства
@@ -91,9 +106,12 @@ def validate_init_data(
     if user_json:
         try:
             params["user"] = json.loads(user_json)
+            logger.debug(f"Parsed user: id={params['user'].get('id')}")
         except json.JSONDecodeError:
+            logger.warning("Failed to parse user JSON")
             pass
 
+    logger.debug("initData validation SUCCESS")
     return params
 
 

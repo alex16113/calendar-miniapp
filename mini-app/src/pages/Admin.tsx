@@ -284,10 +284,10 @@ function AdminMenu({
           ⏳ Буфер (часы)
         </button>
         <button type="button" className="glass-btn" onClick={() => onSelect("blacklist")}>
-          🚫 Blacklist дат
+          🚫 Задать дни без встреч
         </button>
         <button type="button" className="glass-btn" onClick={() => onSelect("pending")}>
-          📁 Список ожидания (pending)
+          📁 Список заявок на согласование
         </button>
         <button type="button" className="glass-btn" onClick={() => onSelect("broadcast")}>
           🔔 Рассылка участникам встреч
@@ -322,7 +322,7 @@ function AdminPendingList({
 }) {
   return (
     <>
-      <p className="page-section-label">Ожидающие заявки</p>
+      <p className="page-section-label">Список заявок на согласование</p>
       {loading && pending.length === 0 ? (
         <div className="glass-loading">
           <span className="spinner" />
@@ -331,9 +331,9 @@ function AdminPendingList({
       ) : pending.length === 0 ? (
         <div className="glass-panel glass-empty">
           <div className="glass-empty-icon">✓</div>
-          <div className="glass-empty-title">Нет заявок в ожидании</div>
+          <div className="glass-empty-title">Нет заявок на согласование</div>
           <div className="glass-empty-text">
-            Все заявки обработаны. Новые появятся здесь автоматически.
+            Все заявки согласованы. Новые появятся здесь автоматически.
           </div>
         </div>
       ) : (
@@ -730,7 +730,7 @@ function AdminBlacklist({
       .finally(() => setAdding(false));
   };
   const handleRemove = (dateStr: string) => {
-    if (!confirm("Удалить дату из blacklist?")) return;
+    if (!confirm("Убрать эту дату из дней без встреч?")) return;
     api.admin
       .removeBlacklistDate(dateStr)
       .then(() => { haptic.success(); onChanged(); })
@@ -762,7 +762,7 @@ function AdminBlacklist({
           {adding ? "Добавление..." : "Добавить"}
         </button>
       </div>
-      <p className="page-section-label" style={{ marginTop: 20 }}>Даты в blacklist</p>
+      <p className="page-section-label" style={{ marginTop: 20 }}>Дни без встреч</p>
       {dates.length === 0 ? (
         <div className="glass-panel glass-empty">
           <div className="glass-empty-text">Нет дат</div>

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import re
 from contextlib import asynccontextmanager
 from datetime import datetime
@@ -37,20 +38,24 @@ ALLOWED_DURATIONS = (15, 30, 60, 90)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Запуск бота в фоне при старте, отмена при остановке."""
-    from bot import main as run_bot
-
-    bot_task = asyncio.create_task(run_bot())
-    logger.info("Bot task started in background")
+    """Запуск бота в фоне при старте, отмена при остановке. SKIP_BOT=1 — только API, без бота (для проверки сервера)."""
+    bot_task = None
+    if os.environ.get("SKIP_BOT", "").strip().lower() in ("1", "true", "yes"):
+        logger.info("SKIP_BOT=1: bot disabled, only API + static")
+    else:
+        from bot import main as run_bot
+        bot_task = asyncio.create_task(run_bot())
+        logger.info("Bot task started in background")
     try:
         yield
     finally:
-        bot_task.cancel()
-        try:
-            await bot_task
-        except asyncio.CancelledError:
-            pass
-        logger.info("Bot task stopped")
+        if bot_task is not None:
+            bot_task.cancel()
+            try:
+                await bot_task
+            except asyncio.CancelledError:
+                pass
+            logger.info("Bot task stopped")
 
 
 app = FastAPI(
@@ -59,13 +64,15 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS для Mini App: домен деплоя и Web A/B Telegram
+# CORS для Mini App: домен деплоя и Telegram origins (включая mobile apps)
+# Telegram WebView в iOS/Android может использовать разные origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://calendar.vpncfo.ru",
         "https://web.telegram.org",
     ],
+    allow_origin_regex=r"https://.*\.telegram\.org",  # Все поддомены Telegram
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

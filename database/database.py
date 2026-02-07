@@ -768,6 +768,25 @@ class Database:
         with self.get_conn() as conn:
             conn.execute("DELETE FROM users_blacklisted WHERE user_id = ?", (user_id,))
 
+    def list_banned_users(self, limit: int = 200) -> list[tuple[int, str, Optional[str], Optional[str]]]:
+        """Возвращает (user_id, banned_at_iso, username, user_name) из users_blacklisted + последняя встреча для отображения."""
+        with self.get_conn() as conn:
+            cur = conn.execute(
+                """
+                SELECT b.user_id, b.banned_at,
+                    (SELECT m.username FROM meetings m WHERE m.user_id = b.user_id ORDER BY m.created_at DESC LIMIT 1),
+                    (SELECT m.user_name FROM meetings m WHERE m.user_id = b.user_id ORDER BY m.created_at DESC LIMIT 1)
+                FROM users_blacklisted b
+                ORDER BY b.banned_at DESC
+                LIMIT ?
+                """,
+                (int(limit),),
+            )
+            return [
+                (row["user_id"], row["banned_at"], row[2], row[3])
+                for row in cur.fetchall()
+            ]
+
     def is_user_blacklisted(self, user_id: int) -> bool:
         with self.get_conn() as conn:
             cur = conn.execute(

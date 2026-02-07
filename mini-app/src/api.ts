@@ -129,6 +129,10 @@ export const api = {
       }),
     banMeeting: (meetingId: number) =>
       request<{ ok: boolean }>(`/admin/meetings/${meetingId}/ban`, { method: "POST" }),
+    getBanned: () =>
+      request<{ items: AdminBannedItem[] }>("/admin/banned"),
+    unbanUser: (userId: number) =>
+      request<{ ok: boolean }>(`/admin/banned/${userId}/unban`, { method: "POST" }),
     broadcast: (date: string, text: string) =>
       request<{ ok: boolean; sent: number; failed: number; total: number }>("/admin/broadcast", {
         method: "POST",
@@ -163,4 +167,11 @@ export interface AdminPendingResponse {
   limit: number;
   total_pages: number;
   items: AdminPendingItem[];
+}
+
+export interface AdminBannedItem {
+  user_id: number;
+  banned_at: string;
+  username: string | null;
+  user_name: string | null;
 }

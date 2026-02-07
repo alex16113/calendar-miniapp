@@ -360,6 +360,45 @@ async def admin_meeting_ban(
     return {"ok": True}
 
 
+# --- Banned users (список и разбан) ---
+
+
+@router.get("/banned")
+async def admin_list_banned(
+    _admin_id: int = Depends(get_telegram_admin_id),
+):
+    """Список забаненных пользователей (user_id, banned_at, username, user_name из последней встречи)."""
+    from database import get_db
+    db = get_db()
+    rows = db.list_banned_users(limit=200)
+    return {
+        "items": [
+            {
+                "user_id": r[0],
+                "banned_at": r[1],
+                "username": r[2],
+                "user_name": r[3],
+            }
+            for r in rows
+        ],
+    }
+
+
+@router.post("/banned/{user_id}/unban")
+async def admin_unban_user(
+    user_id: int,
+    _admin_id: int = Depends(get_telegram_admin_id),
+):
+    """Разбанить пользователя по Telegram user_id."""
+    from database import get_db
+    db = get_db()
+    if not db.is_user_blacklisted(user_id):
+        raise HTTPException(status_code=404, detail="User not in ban list")
+    db.unblacklist_user(user_id)
+    logger.info("User unbanned via admin API", extra={"user_id": user_id})
+    return {"ok": True}
+
+
 # --- Broadcast ---
 
 

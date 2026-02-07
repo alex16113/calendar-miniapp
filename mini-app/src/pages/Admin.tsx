@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { api, type AdminPendingItem, type AdminSettings } from "../api";
+import { api, type AdminBannedItem, type AdminPendingItem, type AdminSettings } from "../api";
 import { haptic } from "../utils/haptic";
 
 const WEEKDAY_LABELS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
@@ -17,7 +17,7 @@ const TZ_QUICK: { label: string; tz: string }[] = [
   { label: "Владивосток", tz: "Asia/Vladivostok" },
 ];
 
-type AdminScreen = "menu" | "pending" | "timezone" | "work" | "buffer" | "blacklist" | "broadcast";
+type AdminScreen = "menu" | "pending" | "timezone" | "work" | "buffer" | "blacklist" | "banned" | "broadcast";
 
 export default function Admin() {
   const [screen, setScreen] = useState<AdminScreen>("menu");
@@ -30,6 +30,8 @@ export default function Admin() {
   const [pendingLoading, setPendingLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [forbidden, setForbidden] = useState(false);
+  const [banned, setBanned] = useState<AdminBannedItem[]>([]);
+  const [bannedLoading, setBannedLoading] = useState(false);
   const limit = 10;
 
   // Загрузка настроек при входе (проверка прав через getSettings)
@@ -88,6 +90,19 @@ export default function Admin() {
     return () => { cancelled = true; };
   }, [screen, page]);
 
+  // Загрузка списка забаненных при открытии экрана «Забаненные»
+  useEffect(() => {
+    if (screen !== "banned") return;
+    let cancelled = false;
+    setBannedLoading(true);
+    api.admin
+      .getBanned()
+      .then((res) => { if (!cancelled) setBanned(res.items); })
+      .catch((e) => { if (!cancelled) setError(e.message || "Ошибка загрузки"); })
+      .finally(() => { if (!cancelled) setBannedLoading(false); });
+    return () => { cancelled = true; };
+  }, [screen]);
+
   const goToMenu = () => {
     setScreen("menu");
     setError(null);
@@ -138,6 +153,21 @@ export default function Admin() {
       .then(() => {
         haptic.success();
         removeFromList(id);
+      })
+      .catch((e) => {
+        haptic.error();
+        alert(e.message || "Ошибка");
+      });
+  };
+
+  const handleUnban = (userId: number) => {
+    if (!confirm("Разбанить пользователя?")) return;
+    haptic.medium();
+    api.admin
+      .unbanUser(userId)
+      .then(() => {
+        haptic.success();
+        setBanned((prev) => prev.filter((u) => u.user_id !== userId));
       })
       .catch((e) => {
         haptic.error();
@@ -236,6 +266,15 @@ export default function Admin() {
           />
         )}
 
+        {screen === "banned" && (
+          <AdminBannedList
+            items={banned}
+            loading={bannedLoading}
+            onUnban={handleUnban}
+            onBack={goToMenu}
+          />
+        )}
+
         {screen === "broadcast" && (
           <AdminBroadcast onBack={goToMenu} />
         )}
@@ -293,6 +332,9 @@ function AdminMenu({
         </button>
         <button type="button" className="glass-btn" onClick={() => onSelect("blacklist")}>
           🚫 Задать дни без встреч
+        </button>
+        <button type="button" className="glass-btn" onClick={() => onSelect("banned")}>
+          🚷 Забаненные
         </button>
         <button type="button" className="glass-btn" onClick={() => onSelect("broadcast")}>
           🔔 Рассылка участникам встреч
@@ -424,6 +466,87 @@ function AdminPendingList({
             </div>
           )}
         </>
+      )}
+    </>
+  );
+}
+
+function AdminBannedList({
+  items,
+  loading,
+  onUnban,
+  onBack: _onBack,
+}: {
+  items: AdminBannedItem[];
+  loading: boolean;
+  onUnban: (userId: number) => void;
+  onBack: () => void;
+}) {
+  const formatDate = (iso: string) => {
+    try {
+      const d = new Date(iso);
+      return d.toLocaleString("ru-RU", { dateStyle: "short", timeStyle: "short" });
+    } catch {
+      return iso;
+    }
+  };
+
+  return (
+    <>
+      <p className="page-section-label">Забаненные пользователи</p>
+      {loading && items.length === 0 ? (
+        <div className="glass-loading">
+          <span className="spinner" />
+          Загрузка...
+        </div>
+      ) : items.length === 0 ? (
+        <div className="glass-panel glass-empty">
+          <div className="glass-empty-icon">✓</div>
+          <div className="glass-empty-title">Нет забаненных</div>
+          <div className="glass-empty-text">
+            Список пуст. Забаненные появятся здесь после действия «Заблокировать пользователя» в заявках.
+          </div>
+        </div>
+      ) : (
+        <div className="glass-panel" style={{ padding: 0 }}>
+          {items.map((u) => (
+            <div
+              key={u.user_id}
+              className="meeting-card meeting-card-even"
+              style={{ marginLeft: 0, marginRight: 0, marginBottom: 8 }}
+            >
+              <div style={{ marginBottom: 8 }}>
+                <div style={{ fontWeight: 600, fontSize: 15 }}>
+                  {u.user_name || (u.username ? `@${u.username}` : null) || `ID ${u.user_id}`}
+                </div>
+                {u.username && !u.user_name && <div style={{ fontSize: 13, color: "var(--tg-hint)" }}>@{u.username}</div>}
+                <div style={{ fontSize: 12, color: "var(--tg-hint)" }}>Забанен: {formatDate(u.banned_at)} · ID {u.user_id}</div>
+              </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {u.username ? (
+                  <a
+                    href="#"
+                    className="glass-btn glass-btn-muted"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const link = `tg://user?id=${u.user_id}`;
+                      if (window.Telegram?.WebApp?.openTelegramLink) {
+                        window.Telegram.WebApp.openTelegramLink(link);
+                      } else {
+                        window.open(link, "_blank");
+                      }
+                    }}
+                  >
+                    Открыть в TG
+                  </a>
+                ) : null}
+                <button type="button" className="glass-btn glass-btn-accent" onClick={() => onUnban(u.user_id)}>
+                  Разбанить
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </>
   );

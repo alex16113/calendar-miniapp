@@ -7,7 +7,6 @@ from aiogram.filters import Command
 from aiogram.types import Message
 
 from app_context import get_settings
-from handlers.booking import _main_menu_kb  # type: ignore
 
 
 logger = logging.getLogger(__name__)
@@ -28,12 +27,9 @@ async def cmd_start(message: Message) -> None:
     if is_admin:
         text += "/admin (только для владельца)\n"
     text += "/my (мои заявки)\n"
-    text += "/book (записаться)"
+    text += "/book (записаться)\n\n"
+    text += "Нажми кнопку, чтобы начать запись."
     await message.answer(text)
-    await message.answer(
-        "Нажми кнопку, чтобы начать запись.",
-        reply_markup=_main_menu_kb(),
-    )
 
 
 @router.message(Command("help"))

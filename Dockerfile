@@ -24,7 +24,7 @@ COPY services/ services/
 COPY middlewares/ middlewares/
 COPY scripts/ scripts/
 COPY app_context.py bot.py config.py logging_context.py logging_setup.py run.py ./
-COPY --from=frontend-build /build/dist /app/dist
+COPY --from=frontend-build /build/dist ./dist
 
 RUN adduser --disabled-password --gecos "" appuser \
     && mkdir -p /app/data /app/runtime \

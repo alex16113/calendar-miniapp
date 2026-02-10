@@ -30,8 +30,6 @@ RUN adduser --disabled-password --gecos "" appuser \
     && mkdir -p /app/data /app/runtime \
     && chown -R appuser:appuser /app
 
-USER appuser
-
 # Один процесс: бот (в фоне) + uvicorn на 8000. Volume для БД/OAuth: монтировать /app/data
 EXPOSE 8000
 CMD ["python", "run.py"]
